@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Painel interativo de monitoramento da aprendizagem por escola e turma.">
+  <title>AMI | Painel de Avaliação da Aprendizagem</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <!-- Fonte -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --navy: #14233b;
+      --navy-2: #1d3150;
+      --ink: #202c3d;
+      --muted: #778397;
+      --line: #e8edf3;
+      --canvas: #f4f7fb;
+      --white: #fff;
+      --red: #dc4545;
+      --yellow: #e8bd42;
+      --light-green: #91cda9;
+      --green: #176b43;
+      --blue: #5276d8;
+      --shadow: 0 8px 26px rgba(28, 48, 78, .055);
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--canvas); color: var(--ink); font-family: "DM Sans", sans-serif; }
+    .app-shell { min-height: 100vh; }
+    .sidebar {
+      width: 270px; min-height: 100vh; background: linear-gradient(180deg, var(--navy), #101d31);
+      color: #fff; padding: 25px 19px; position: fixed; inset: 0 auto 0 0; z-index: 20;
+      display: flex; flex-direction: column;
+    }
+    .brand { display:flex; align-items:center; gap:12px; padding: 3px 5px 25px; border-bottom:1px solid rgba(255,255,255,.12); }
+    .brand-mark { width:43px; height:43px; border-radius:14px; display:grid; place-items:center; background:linear-gradient(135deg,#6e8df1,#4366cb); font-size:21px; }
+    .brand-name { font-size:17px; font-weight:800; letter-spacing:.3px; }
+    .brand-sub { font-size:10px; color:#aebbd0; letter-spacing:1.5px; text-transform:uppercase; margin-top:2px; }
+    .logo-slot { margin:22px 3px 25px; height:105px; border:1px dashed rgba(255,255,255,.3); border-radius:14px; display:grid; place-items:center; color:#aebbd0; font-size:11px; overflow:hidden; background:rgba(255,255,255,.035); }
+    .logo-slot img { max-width:90%; max-height:90%; object-fit:contain; }
+    .side-label { color:#8fa1bb; font-size:10px; font-weight:800; letter-spacing:1.4px; text-transform:uppercase; margin: 0 4px 12px; }
+    .filter-label { font-size:12px; color:#dbe4f1; font-weight:600; margin:0 0 7px 2px; }
+    .sidebar .form-select { background-color:#203450; border:1px solid #354b68; color:#fff; border-radius:10px; min-height:43px; font-size:12px; }
+    .sidebar .form-select:focus { border-color:#8199ef; box-shadow:0 0 0 .2rem rgba(110,141,241,.15); }
+    .sidebar .form-select option { color:#202c3d; background:#fff; }
+    .filter-block { margin-bottom:17px; }
+    .side-note { margin-top:20px; padding:12px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:12px; color:#bdc9da; font-size:11px; line-height:1.6; }
+    .sidebar-bottom { margin-top:auto; color:#8fa1bb; font-size:10px; padding:18px 4px 0; }
+    .main { margin-left:270px; padding:32px 35px 22px; max-width:1800px; }
+    .topline { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:26px; }
+    .eyebrow { font-size:10px; color:var(--blue); letter-spacing:1.5px; font-weight:800; text-transform:uppercase; }
+    h1 { font-size:26px; font-weight:800; letter-spacing:-.8px; margin:5px 0 4px; }
+    .subtitle { color:var(--muted); font-size:12px; }
+    .top-actions { display:flex; gap:9px; align-items:center; flex-wrap:wrap; }
+    .btn-upload { background:var(--navy); color:#fff; border:0; border-radius:11px; padding:11px 15px; font-size:12px; font-weight:700; box-shadow:0 5px 14px rgba(20,35,59,.15); }
+    .btn-upload:hover { background:#263e61; color:#fff; }
+    .btn-soft { border:1px solid var(--line); background:#fff; color:#536176; border-radius:11px; padding:10px 13px; font-size:12px; font-weight:700; }
+    .context-bar { background:#eaf0ff; border:1px solid #dce6ff; color:#4b619c; padding:10px 14px; border-radius:11px; font-size:11px; margin-bottom:18px; display:flex; align-items:center; gap:9px; }
+    .section-heading { font-size:13px; font-weight:800; margin:0; }
+    .section-caption { color:var(--muted); font-size:10px; margin-top:3px; }
+    .kpi-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin:14px 0 23px; }
+    .kpi-card, .chart-card, .table-card { background:var(--white); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); }
+    .kpi-card { padding:17px 18px; position:relative; overflow:hidden; }
+    .kpi-top { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+    .kpi-label { color:var(--muted); font-size:11px; font-weight:600; }
+    .kpi-icon { width:34px; height:34px; display:grid; place-items:center; border-radius:11px; font-size:15px; }
+    .kpi-value { font-size:27px; font-weight:800; letter-spacing:-1px; margin-top:13px; line-height:1; }
+    .kpi-foot { color:var(--muted); font-size:10px; margin-top:8px; }
+    .kpi-card::after { content:""; position:absolute; width:65px; height:65px; border-radius:50%; right:-28px; bottom:-35px; background:var(--tint); }
+    .charts-grid { display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:19px; }
+    .chart-card { padding:19px 19px 13px; min-width:0; }
+    .chart-header { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+    .chart-title { font-size:13px; font-weight:800; }
+    .chart-subtitle { font-size:10px; color:var(--muted); margin-top:4px; }
+    .download-btn { border:1px solid var(--line); background:#fff; border-radius:9px; color:#647187; font-size:10px; padding:7px 9px; font-weight:700; white-space:nowrap; }
+    .download-btn:hover { background:#f5f7fb; }
+    .legend { display:flex; flex-wrap:wrap; gap:11px; margin:15px 0 4px; }
+    .legend-item { display:flex; align-items:center; gap:5px; color:#718096; font-size:9px; }
+    .legend-dot { width:8px; height:8px; border-radius:3px; }
+    .chart-wrap { height:280px; position:relative; }
+    .table-card { padding:19px; }
+    .table-responsive { margin-top:14px; }
+    .table { --bs-table-bg:transparent; margin-bottom:0; font-size:11px; }
+    .table thead th { color:#8792a3; font-size:9px; letter-spacing:.5px; text-transform:uppercase; font-weight:800; border-bottom:1px solid var(--line); padding:11px 10px; white-space:nowrap; }
+    .table tbody td { padding:12px 10px; border-color:#f0f2f6; color:#4c596c; vertical-align:middle; }
+    .table tbody tr:last-child td { border-bottom:0; }
+    .table .school-cell { font-weight:700; color:#28364a; min-width:190px; white-space:normal; }
+    .table .num { font-variant-numeric:tabular-nums; text-align:right; }
+    .badge-level { display:inline-block; border-radius:6px; padding:4px 7px; font-size:9px; font-weight:800; }
+    .empty-state { padding:55px 10px; text-align:center; color:var(--muted); font-size:12px; }
+    .footer { display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; padding:19px 3px 0; color:#98a2b1; font-size:10px; }
+    .mobile-brand { display:none; }
+    #loadingOverlay { display:none; position:fixed; inset:0; background:rgba(244,247,251,.78); z-index:50; align-items:center; justify-content:center; backdrop-filter:blur(3px); }
+    #loadingOverlay.show { display:flex; }
+    .loading-box { background:#fff; padding:22px 28px; border-radius:16px; box-shadow:var(--shadow); font-size:12px; font-weight:700; }
+    @media(max-width:1100px) { .sidebar{width:235px}.main{margin-left:235px;padding:26px 22px}.kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.charts-grid{grid-template-columns:1fr} }
+    @media(max-width:700px) {
+      .sidebar{position:relative;width:100%;min-height:0;padding:15px 16px 17px}
+      .brand{padding-bottom:13px}.logo-slot{display:none}.sidebar-bottom{display:none}
+      .sidebar .filter-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.filter-block{margin:0}
+      .side-note{margin-top:12px}
+      .main{margin:0;padding:22px 14px}
+      h1{font-size:22px}.topline{align-items:flex-start}
+      .kpi-grid{gap:9px}.kpi-card{padding:13px}.kpi-value{font-size:23px}
+      .chart-card,.table-card{padding:15px}.chart-wrap{height:255px}
+    }
+    @media(max-width:390px){.sidebar .filter-row{grid-template-columns:1fr}.top-actions{width:100%}.top-actions>*{flex:1}}
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark"><i class="bi bi-bar-chart-line-fill"></i></div>
+      <div><div class="brand-name">AMI <span style="color:#91aaff">DASHBOARD</span></div><div class="brand-sub">Monitoramento educacional</div></div>
+    </div>
+
+    <div class="logo-slot" id="logoPreview">
+      <div class="text-center"><i class="bi bi-image" style="font-size:23px"></i><div class="mt-2">ESPAÇO PARA LOGOTIPO</div></div>
+    </div>
+
+    <div class="side-label"><i class="bi bi-sliders me-1"></i> Filtros de análise</div>
+    <div class="filter-row">
+      <div class="filter-block">
+        <label class="filter-label" for="schoolFilter">Escola / LOCAL</label>
+        <select class="form-select" id="schoolFilter"><option value="">Todas as escolas</option></select>
+      </div>
+      <div class="filter-block">
+        <label class="filter-label" for="classFilter">Turma</label>
+        <select class="form-select" id="classFilter" disabled><option value="">Todas as turmas</option></select>
+      </div>
+    </div>
+    <div class="side-note"><i class="bi bi-info-circle me-1"></i> Os filtros são integrados. Ao selecionar uma escola, a lista de turmas é atualizada e todos os indicadores e gráficos são recalculados.</div>
+    <div class="sidebar-bottom"><i class="bi bi-shield-check me-1"></i> Análise local dos dados no navegador</div>
+  </aside>
+
+  <main class="main">
+    <header class="topline">
+      <div>
+        <div class="eyebrow">Painel de indicadores educacionais</div>
+        <h1>Avaliação da Aprendizagem</h1>
+        <div class="subtitle">Acompanhamento dos níveis de desempenho por escola e turma.</div>
+      </div>
+      <div class="top-actions">
+        <label class="btn-upload mb-0" for="xlsxInput" style="cursor:pointer"><i class="bi bi-file-earmark-arrow-up me-1"></i> Carregar XLSX</label>
+        <input type="file" id="xlsxInput" accept=".xlsx,.xls" hidden>
+        <label class="btn-soft mb-0" for="logoInput" style="cursor:pointer"><i class="bi bi-image me-1"></i> Logotipo</label>
+        <input type="file" id="logoInput" accept="image/*" hidden>
+        <button class="btn-soft" id="resetFilters"><i class="bi bi-arrow-counterclockwise me-1"></i> Limpar</button>
+      </div>
+    </header>
+
+    <div class="context-bar" id="dataStatus">
+      <i class="bi bi-cloud-check"></i>
+      <span>Carregando a base de dados bd_ami.xlsx...</span>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-end flex-wrap gap-2">
+      <div><div class="section-heading">Resumo dos resultados</div><div class="section-caption" id="selectionCaption">Todas as escolas · Todas as turmas</div></div>
+      <div class="section-caption" id="recordCount">Aguardando dados</div>
+    </div>
+
+    <section class="kpi-grid">
+      <article class="kpi-card" style="--tint:#eaf0ff">
+        <div class="kpi-top"><div class="kpi-label">Total de estudantes</div><div class="kpi-icon" style="background:#eaf0ff;color:#5276d8"><i class="bi bi-people-fill"></i></div></div>
+        <div class="kpi-value" id="kpiTotal">—</div><div class="kpi-foot">Estudantes contabilizados no recorte</div>
+      </article>
+      <article class="kpi-card" style="--tint:#fff0ef">
+        <div class="kpi-top"><div class="kpi-label">Abaixo do crítico</div><div class="kpi-icon" style="background:#fff0ef;color:var(--red)"><i class="bi bi-graph-down-arrow"></i></div></div>
+        <div class="kpi-value" id="kpiBelow" style="color:var(--red)">—</div><div class="kpi-foot" id="kpiBelowPct">— do total</div>
+      </article>
+      <article class="kpi-card" style="--tint:#fff8e6">
+        <div class="kpi-top"><div class="kpi-label">Nível crítico</div><div class="kpi-icon" style="background:#fff8e6;color:#b78c16"><i class="bi bi-exclamation-triangle-fill"></i></div></div>
+        <div class="kpi-value" id="kpiCritical" style="color:#b78c16">—</div><div class="kpi-foot" id="kpiCriticalPct">— do total</div>
+      </article>
+      <article class="kpi-card" style="--tint:#eaf6ef">
+        <div class="kpi-top"><div class="kpi-label">Intermediário + desejável</div><div class="kpi-icon" style="background:#eaf6ef;color:var(--green)"><i class="bi bi-check2-circle"></i></div></div>
+        <div class="kpi-value" id="kpiPositive" style="color:var(--green)">—</div><div class="kpi-foot" id="kpiPositivePct">— do total</div>
+      </article>
+    </section>
+
+    <section class="charts-grid">
+      <article class="chart-card">
+        <div class="chart-header">
+          <div><div class="chart-title">Quantidade por categoria</div><div class="chart-subtitle" id="countChartSubtitle">Comparação entre escolas</div></div>
+          <button class="download-btn" data-download="countChart"><i class="bi bi-download me-1"></i> PNG</button>
+        </div>
+        <div class="legend">
+          <span class="legend-item"><i class="legend-dot" style="background:var(--red)"></i>Abaixo crítico</span>
+          <span class="legend-item"><i class="legend-dot" style="background:var(--yellow)"></i>Crítico</span>
+          <span class="legend-item"><i class="legend-dot" style="background:var(--light-green)"></i>Intermediário</span>
+          <span class="legend-item"><i class="legend-dot" style="background:var(--green)"></i>Desejável</span>
+        </div>
+        <div class="chart-wrap"><canvas id="countChart"></canvas></div>
+      </article>
+
+      <article class="chart-card">
+        <div class="chart-header">
+          <div><div class="chart-title">Distribuição percentual por nível</div><div class="chart-subtitle" id="percentChartSubtitle">Composição de cada escola · 100%</div></div>
+          <button class="download-btn" data-download="percentChart"><i class="bi bi-download me-1"></i> PNG</button>
+        </div>
+        <div class="legend">
+          <span class="legend-item"><i class="legend-dot" style="background:var(--red)"></i>Abaixo crítico</span>
+          <span class="legend-item"><i class="legend-dot" style="background:var(--yellow)"></i>Crítico</span>
+          <span class="legend-item"><i class="legend-dot" style="background:var(--light-green)"></i>Intermediário</span>
+          <span class="legend-item"><i class="legend-dot" style="background:var(--green)"></i>Desejável</span>
+        </div>
+        <div class="chart-wrap"><canvas id="percentChart"></canvas></div>
+      </article>
+    </section>
+
+    <section class="table-card">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div><div class="section-heading">Detalhamento dos registros</div><div class="section-caption">Valores consolidados de acordo com os filtros aplicados</div></div>
+        <button class="btn-soft" id="exportCsv"><i class="bi bi-filetype-csv me-1"></i> Exportar CSV</button>
+      </div>
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead><tr><th>Escola</th><th>Turma</th><th class="text-end">Abaixo crítico</th><th class="text-end">Crítico</th><th class="text-end">Intermediário</th><th class="text-end">Desejável</th><th class="text-end">Total</th></tr></thead>
+          <tbody id="dataTable"><tr><td colspan="7"><div class="empty-state"><i class="bi bi-file-earmark-spreadsheet fs-2 d-block mb-2"></i>Carregando os dados da planilha...</div></td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <span>AMI · Painel de Monitoramento da Aprendizagem</span>
+      <span id="lastUpdate">Atualização automática conforme os filtros</span>
+    </footer>
+  </main>
+</div>
+
+<div id="loadingOverlay"><div class="loading-box"><span class="spinner-border spinner-border-sm me-2"></span> Processando planilha...</div></div>
+
+<!-- Bibliotecas de gráficos e leitura XLSX -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<script>
+(() => {
+  "use strict";
+
+  const FILE_NAME = "bd_ami.xlsx";
+  const COLORS = ["#dc4545", "#e8bd42", "#91cda9", "#176b43"];
+  const LABELS = ["Abaixo do crítico", "Crítico", "Intermediário", "Desejável"];
+  const FIELDS = ["ABAIXO_CRITICO", "CRITICO", "INTERMEDIARIO", "DESEJAVEL"];
+  let records = [];
+  let filteredRecords = [];
+  let countChart = null;
+  let percentChart = null;
+  let currentFileName = FILE_NAME;
+
+  const $ = id => document.getElementById(id);
+  const fmt = n => Number(n || 0).toLocaleString("pt-BR", { maximumFractionDigits: 0 });
+  const pct = (n, total) => total ? (100 * n / total).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + "%" : "0,0%";
+  const cleanText = v => String(v ?? "").replace(/\s+/g, " ").trim();
+  const normalizeHeader = s => String(s ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toUpperCase().replace(/\s+/g, "_").replace(/%/g, "");
+
+  function parseNumber(value) {
+    if (typeof value === "number") return Number.isFinite(value) ? value : 0;
+    let s = String(value ?? "").trim().replace(/\s/g, "");
+    if (!s) return 0;
+    if (s.includes(",")) s = s.replace(/\./g, "").replace(",", ".");
+    const n = Number(s);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  function setStatus(message, type = "info") {
+    const el = $("dataStatus");
+    const icon = type === "success" ? "bi-check-circle-fill" : type === "error" ? "bi-exclamation-circle-fill" : "bi-info-circle";
+    el.innerHTML = `<i class="bi ${icon}"></i><span>${escapeHtml(message)}</span>`;
+    el.style.background = type === "error" ? "#fff0ef" : type === "success" ? "#eaf6ef" : "#eaf0ff";
+    el.style.borderColor = type === "error" ? "#f4d4d1" : type === "success" ? "#d6eadc" : "#dce6ff";
+    el.style.color = type === "error" ? "#a83b35" : type === "success" ? "#246c45" : "#4b619c";
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, c => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    })[c]);
+  }
+
+  function normalizeRows(jsonRows) {
+    if (!jsonRows.length) throw new Error("A primeira aba da planilha está vazia.");
+    const mapped = jsonRows.map(raw => {
+      const obj = {};
+      Object.entries(raw).forEach(([key, value]) => obj[normalizeHeader(key)] = value);
+      return obj;
+    });
+    const required = ["LOCAL", "TURMA", ...FIELDS];
+    const headers = Object.keys(mapped[0]);
+    const missing = required.filter(field => !headers.includes(field));
+    if (missing.length) throw new Error("Colunas obrigatórias ausentes: " + missing.join(", "));
+
+    const normalized = mapped.map((r, index) => {
+      const item = { LOCAL: cleanText(r.LOCAL), TURMA: cleanText(r.TURMA) };
+      FIELDS.forEach(field => item[field] = parseNumber(r[field]));
+      if (!item.LOCAL || !item.TURMA) return null;
+      if (FIELDS.some(field => item[field] < 0)) throw new Error(`Valor negativo encontrado na linha ${index + 2}.`);
+      return item;
+    }).filter(Boolean);
+
+    if (!normalized.length) throw new Error("Não foram encontrados registros válidos.");
+    return normalized;
+  }
+
+  function populateSchools() {
+    const schoolSelect = $("schoolFilter");
+    const previous = schoolSelect.value;
+    schoolSelect.innerHTML = '<option value="">Todas as escolas</option>';
+    [...new Set(records.map(r => r.LOCAL))].sort((a,b) => a.localeCompare(b, "pt-BR")).forEach(name => {
+      schoolSelect.add(new Option(name, name));
+    });
+    if ([...schoolSelect.options].some(o => o.value === previous)) schoolSelect.value = previous;
+    populateClasses();
+  }
+
+  function populateClasses() {
+    const selectedSchool = $("schoolFilter").value;
+    const classSelect = $("classFilter");
+    const previous = classSelect.value;
+    classSelect.innerHTML = '<option value="">Todas as turmas</option>';
+    const classes = [...new Set(records.filter(r => !selectedSchool || r.LOCAL === selectedSchool).map(r => r.TURMA))].sort((a,b) => a.localeCompare(b, "pt-BR"));
+    classes.forEach(name => classSelect.add(new Option(name, name)));
+    classSelect.disabled = !selectedSchool;
+    if (classes.includes(previous)) classSelect.value = previous;
+  }
+
+  function aggregate(list) {
+    const totals = FIELDS.map(field => list.reduce((sum, row) => sum + row[field], 0));
+    return { totals, total: totals.reduce((sum, value) => sum + value, 0) };
+  }
+
+  function groupData(list, schoolSelected) {
+    const groups = new Map();
+    list.forEach(row => {
+      const key = schoolSelected ? row.TURMA : row.LOCAL;
+      if (!groups.has(key)) groups.set(key, FIELDS.map(() => 0));
+      FIELDS.forEach((field, i) => groups.get(key)[i] += row[field]);
+    });
+    return [...groups.entries()].sort((a,b) => a[0].localeCompare(b[0], "pt-BR"));
+  }
+
+  function chartOptions(stacked = false, percent = false) {
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: "#14233b", padding: 11, cornerRadius: 9,
+          titleFont: { family: "DM Sans", size: 11, weight: "700" },
+          bodyFont: { family: "DM Sans", size: 11 },
+          callbacks: {
+            label: context => `${context.dataset.label}: ${percent ? context.parsed.y.toLocaleString("pt-BR", {maximumFractionDigits:1}) + "%" : fmt(context.parsed.y)}`
+          }
+        }
+      },
+      scales: {
+        x: {
+          stacked, grid: { display: false },
+          ticks: { color: "#8792a3", font: { family: "DM Sans", size: 9 }, maxRotation: 35, minRotation: 0, autoSkip: true },
+          border: { display: false }
+        },
+        y: {
+          stacked, beginAtZero: true, max: percent ? 100 : undefined,
+          ticks: { color: "#8792a3", font: { family: "DM Sans", size: 9 }, callback: value => percent ? value + "%" : fmt(value) },
+          grid: { color: "#edf0f5", drawTicks: false },
+          border: { display: false }
+        }
+      }
+    };
+  }
+
+  function buildCharts(groups) {
+    const labels = groups.map(([name]) => name);
+    const countDatasets = FIELDS.map((field, i) => ({
+      label: LABELS[i], data: groups.map(([, values]) => values[i]),
+      backgroundColor: COLORS[i], borderRadius: 4, borderSkipped: false, maxBarThickness: 34
+    }));
+    const percentDatasets = FIELDS.map((field, i) => ({
+      label: LABELS[i],
+      data: groups.map(([, values]) => {
+        const total = values.reduce((a,b) => a + b, 0);
+        return total ? values[i] / total * 100 : 0;
+      }),
+      backgroundColor: COLORS[i], borderRadius: 2, borderSkipped: false, maxBarThickness: 38
+    }));
+
+    if (countChart) countChart.destroy();
+    if (percentChart) percentChart.destroy();
+
+    countChart = new Chart($("countChart"), {
+      type: "bar", data: { labels, datasets: countDatasets }, options: chartOptions(false, false)
+    });
+    percentChart = new Chart($("percentChart"), {
+      type: "bar", data: { labels, datasets: percentDatasets }, options: chartOptions(true, true)
+    });
+  }
+
+  function renderTable(list) {
+    const tbody = $("dataTable");
+    if (!list.length) {
+      tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="bi bi-search fs-2 d-block mb-2"></i>Nenhum registro corresponde aos filtros selecionados.</div></td></tr>';
+      return;
+    }
+    tbody.innerHTML = list.map(row => {
+      const total = FIELDS.reduce((sum, f) => sum + row[f], 0);
+      return `<tr>
+        <td class="school-cell">${escapeHtml(row.LOCAL)}</td>
+        <td>${escapeHtml(row.TURMA)}</td>
+        ${FIELDS.map((f, i) => `<td class="num">${fmt(row[f])}</td>`).join("")}
+        <td class="num fw-bold">${fmt(total)}</td>
+      </tr>`;
+    }).join("");
+  }
+
+  function render() {
+    if (!records.length) return;
+    const school = $("schoolFilter").value;
+    const turma = $("classFilter").value;
+    filteredRecords = records.filter(row =>
+      (!school || row.LOCAL === school) && (!turma || row.TURMA === turma)
+    );
+
+    const { totals, total } = aggregate(filteredRecords);
+    $("kpiTotal").textContent = fmt(total);
+    $("kpiBelow").textContent = fmt(totals[0]);
+    $("kpiBelowPct").textContent = pct(totals[0], total) + " do total";
+    $("kpiCritical").textContent = fmt(totals[1]);
+    $("kpiCriticalPct").textContent = pct(totals[1], total) + " do total";
+    $("kpiPositive").textContent = fmt(totals[2] + totals[3]);
+    $("kpiPositivePct").textContent = pct(totals[2] + totals[3], total) + " do total";
+
+    $("selectionCaption").textContent = `${school || "Todas as escolas"} · ${turma || "Todas as turmas"}`;
+    $("recordCount").textContent = `${filteredRecords.length} registro(s) · ${new Set(filteredRecords.map(r => r.LOCAL)).size} escola(s)`;
+    $("countChartSubtitle").textContent = school ? "Comparação entre turmas da escola selecionada" : "Comparação entre escolas";
+    $("percentChartSubtitle").textContent = turma ? "Composição percentual da turma selecionada · 100%" : school ? "Composição percentual por turma · 100%" : "Composição percentual por escola · 100%";
+
+    buildCharts(groupData(filteredRecords, Boolean(school)));
+    renderTable(filteredRecords);
+    $("lastUpdate").textContent = "Dados atualizados em " + new Date().toLocaleString("pt-BR");
+  }
+
+  async function loadWorkbookFile(file, showSuccess = true) {
+    $("loadingOverlay").classList.add("show");
+    try {
+      const buffer = await file.arrayBuffer();
+      const workbook = XLSX.read(buffer, { type: "array" });
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+      const json = XLSX.utils.sheet_to_json(firstSheet, { defval: "" });
+      records = normalizeRows(json);
+      currentFileName = file.name;
+      populateSchools();
+      render();
+      setStatus(`Base carregada: ${currentFileName} · ${records.length} registros · ${new Set(records.map(r => r.LOCAL)).size} escolas.`, "success");
+    } catch (error) {
+      setStatus("Não foi possível ler a planilha: " + error.message, "error");
+      console.error(error);
+    } finally {
+      $("loadingOverlay").classList.remove("show");
+    }
+  }
+
+  async function loadWorkbookFromSameFolder() {
+    try {
+      const response = await fetch(FILE_NAME, { cache: "no-store" });
+      if (!response.ok) throw new Error(`Arquivo não encontrado (HTTP ${response.status}).`);
+      const buffer = await response.arrayBuffer();
+      const workbook = XLSX.read(buffer, { type: "array" });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      records = normalizeRows(XLSX.utils.sheet_to_json(sheet, { defval: "" }));
+      currentFileName = FILE_NAME;
+      populateSchools();
+      render();
+      setStatus(`Base carregada automaticamente: ${FILE_NAME} · ${records.length} registros · ${new Set(records.map(r => r.LOCAL)).size} escolas.`, "success");
+    } catch (error) {
+      setStatus(`Não foi possível carregar ${FILE_NAME} automaticamente. ${error.message} Use “Carregar XLSX” para selecionar o arquivo.`, "error");
+      $("dataTable").innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="bi bi-file-earmark-excel fs-2 d-block mb-2"></i>Coloque bd_ami.xlsx na mesma pasta do HTML ou carregue a planilha manualmente.</div></td></tr>';
+      $("recordCount").textContent = "Base não carregada";
+    }
+  }
+
+  $("schoolFilter").addEventListener("change", () => { populateClasses(); render(); });
+  $("classFilter").addEventListener("change", render);
+  $("resetFilters").addEventListener("click", () => {
+    $("schoolFilter").value = "";
+    populateClasses();
+    render();
+  });
+  $("xlsxInput").addEventListener("change", event => {
+    const file = event.target.files[0];
+    if (file) loadWorkbookFile(file);
+    event.target.value = "";
+  });
+
+  $("logoInput").addEventListener("change", event => {
+    const file = event.target.files[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    $("logoPreview").innerHTML = `<img src="${url}" alt="Logotipo da instituição">`;
+  });
+
+  document.querySelectorAll("[data-download]").forEach(button => {
+    button.addEventListener("click", () => {
+      const chart = button.dataset.download === "countChart" ? countChart : percentChart;
+      if (!chart) return;
+      const link = document.createElement("a");
+      link.href = chart.toBase64Image("image/png", 1);
+      link.download = button.dataset.download === "countChart" ? "quantidade_por_categoria.png" : "distribuicao_percentual_100.png";
+      link.click();
+    });
+  });
+
+  $("exportCsv").addEventListener("click", () => {
+    if (!filteredRecords.length) { setStatus("Não há registros para exportar.", "error"); return; }
+    const header = ["LOCAL", "TURMA", ...FIELDS, "TOTAL"];
+    const lines = [header, ...filteredRecords.map(r => [...FIELDS.reduce((a,f) => a.concat(r[f]), []), FIELDS.reduce((a,f) => a+r[f],0)].length
+      ? [r.LOCAL, r.TURMA, ...FIELDS.map(f => r[f]), FIELDS.reduce((a,f) => a+r[f],0)]
+      : [])];
+    const csv = "\uFEFF" + lines.map(row => row.map(v => `"${String(v ?? "").replace(/"/g,'""')}"`).join(";")).join("\r\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url; link.download = "dados_ami_filtrados.csv"; link.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // Carregamento automático da planilha que estiver ao lado deste HTML.
+  loadWorkbookFromSameFolder();
+})();
+</script>
+</body>
+</html>
