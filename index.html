@@ -1,542 +1,959 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="light" data-fs="md">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Painel interativo de monitoramento da aprendizagem por escola e turma.">
+  <meta name="theme-color" content="#14233b">
   <title>AMI | Painel de Avaliação da Aprendizagem</title>
 
-  <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Bootstrap Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-  <!-- Fonte -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.cdnfonts.com/css/open-dyslexic" rel="stylesheet">
 
   <style>
+    html { font-size: 16px; scroll-behavior: smooth; }
+    html[data-fs="lg"] { font-size: 18px; }
+    html[data-fs="xl"] { font-size: 20px; }
+
     :root {
       --navy: #14233b;
       --navy-2: #1d3150;
-      --ink: #202c3d;
-      --muted: #778397;
-      --line: #e8edf3;
+      --ink: #1a2433;
+      --muted: #5a6779;
+      --line: #e2e8f0;
       --canvas: #f4f7fb;
+      --card: #ffffff;
       --white: #fff;
-      --red: #dc4545;
-      --yellow: #e8bd42;
-      --light-green: #91cda9;
-      --green: #176b43;
-      --blue: #5276d8;
-      --shadow: 0 8px 26px rgba(28, 48, 78, .055);
+      --red: #d93b3b;
+      --yellow: #e0ab1f;
+      --light-green: #7fc79b;
+      --green: #0f5e3c;
+      --blue: #4264c6;
+      --shadow: 0 8px 28px rgba(28, 48, 78, .07);
       --radius: 18px;
+      --radius-sm: 12px;
     }
+    html[data-theme="dark"] {
+      --ink: #e5edf7;
+      --muted: #98a9c0;
+      --line: #26334a;
+      --canvas: #0d1420;
+      --card: #16202f;
+      --white: #16202f;
+      --navy: #0a1420;
+      --navy-2: #101d31;
+      --shadow: 0 8px 28px rgba(0, 0, 0, .35);
+      color-scheme: dark;
+    }
+
     * { box-sizing: border-box; }
-    body { margin: 0; background: var(--canvas); color: var(--ink); font-family: "DM Sans", sans-serif; }
-    .app-shell { min-height: 100vh; }
+    body {
+      margin: 0; background: var(--canvas); color: var(--ink);
+      font-family: "DM Sans", sans-serif; font-size: 1rem; line-height: 1.5;
+      transition: background-color .25s ease, color .25s ease;
+    }
+    body.dyslexia {
+      font-family: 'Open-Dyslexic', 'OpenDyslexic', 'Atkinson Hyperlegible', 'DM Sans', sans-serif !important;
+      letter-spacing: 0.045em; word-spacing: 0.14em; line-height: 1.75;
+    }
+    body.dyslexia * { font-family: inherit !important; font-style: normal !important; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+
+    /* Skip link */
+    .skip-link {
+      position: absolute; top: -100px; left: 10px; z-index: 999;
+      background: var(--navy); color: #fff; padding: .75rem 1rem;
+      border-radius: .5rem; font-weight: 700; text-decoration: none;
+      font-size: .9rem;
+    }
+    .skip-link:focus { top: 10px; }
+
+    /* Foco visível */
+    :focus-visible {
+      outline: 3px solid var(--blue); outline-offset: 2px; border-radius: 4px;
+    }
+
+    .app-shell { min-height: 100vh; display: flex; }
+
+    /* Sidebar */
     .sidebar {
-      width: 270px; min-height: 100vh; background: linear-gradient(180deg, var(--navy), #101d31);
-      color: #fff; padding: 25px 19px; position: fixed; inset: 0 auto 0 0; z-index: 20;
+      width: 280px; min-height: 100vh;
+      background: linear-gradient(180deg, var(--navy), #0a1420);
+      color: #fff; padding: 1.5rem 1.1rem;
+      position: fixed; inset: 0 auto 0 0; z-index: 20;
       display: flex; flex-direction: column;
+      overflow-y: auto;
     }
-    .brand { display:flex; align-items:center; gap:12px; padding: 3px 5px 25px; border-bottom:1px solid rgba(255,255,255,.12); }
-    .brand-mark { width:43px; height:43px; border-radius:14px; display:grid; place-items:center; background:linear-gradient(135deg,#6e8df1,#4366cb); font-size:21px; }
-    .brand-name { font-size:17px; font-weight:800; letter-spacing:.3px; }
-    .brand-sub { font-size:10px; color:#aebbd0; letter-spacing:1.5px; text-transform:uppercase; margin-top:2px; }
-    .logo-slot { margin:22px 3px 25px; height:105px; border:1px dashed rgba(255,255,255,.3); border-radius:14px; display:grid; place-items:center; color:#aebbd0; font-size:11px; overflow:hidden; background:rgba(255,255,255,.035); }
-    .logo-slot img { max-width:90%; max-height:90%; object-fit:contain; }
-    .side-label { color:#8fa1bb; font-size:10px; font-weight:800; letter-spacing:1.4px; text-transform:uppercase; margin: 0 4px 12px; }
-    .filter-label { font-size:12px; color:#dbe4f1; font-weight:600; margin:0 0 7px 2px; }
-    .sidebar .form-select { background-color:#203450; border:1px solid #354b68; color:#fff; border-radius:10px; min-height:43px; font-size:12px; }
-    .sidebar .form-select:focus { border-color:#8199ef; box-shadow:0 0 0 .2rem rgba(110,141,241,.15); }
-    .sidebar .form-select option { color:#202c3d; background:#fff; }
-    .filter-block { margin-bottom:17px; }
-    .side-note { margin-top:20px; padding:12px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:12px; color:#bdc9da; font-size:11px; line-height:1.6; }
-    .sidebar-bottom { margin-top:auto; color:#8fa1bb; font-size:10px; padding:18px 4px 0; }
-    .main { margin-left:270px; padding:32px 35px 22px; max-width:1800px; }
-    .topline { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:26px; }
-    .eyebrow { font-size:10px; color:var(--blue); letter-spacing:1.5px; font-weight:800; text-transform:uppercase; }
-    h1 { font-size:26px; font-weight:800; letter-spacing:-.8px; margin:5px 0 4px; }
-    .subtitle { color:var(--muted); font-size:12px; }
-    .top-actions { display:flex; gap:9px; align-items:center; flex-wrap:wrap; }
-    .btn-upload { background:var(--navy); color:#fff; border:0; border-radius:11px; padding:11px 15px; font-size:12px; font-weight:700; box-shadow:0 5px 14px rgba(20,35,59,.15); }
-    .btn-upload:hover { background:#263e61; color:#fff; }
-    .btn-soft { border:1px solid var(--line); background:#fff; color:#536176; border-radius:11px; padding:10px 13px; font-size:12px; font-weight:700; }
-    .context-bar { background:#eaf0ff; border:1px solid #dce6ff; color:#4b619c; padding:10px 14px; border-radius:11px; font-size:11px; margin-bottom:18px; display:flex; align-items:center; gap:9px; }
-    .section-heading { font-size:13px; font-weight:800; margin:0; }
-    .section-caption { color:var(--muted); font-size:10px; margin-top:3px; }
-    .kpi-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin:14px 0 23px; }
-    .kpi-card, .chart-card, .table-card { background:var(--white); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); }
-    .kpi-card { padding:17px 18px; position:relative; overflow:hidden; }
-    .kpi-top { display:flex; justify-content:space-between; align-items:center; gap:8px; }
-    .kpi-label { color:var(--muted); font-size:11px; font-weight:600; }
-    .kpi-icon { width:34px; height:34px; display:grid; place-items:center; border-radius:11px; font-size:15px; }
-    .kpi-value { font-size:27px; font-weight:800; letter-spacing:-1px; margin-top:13px; line-height:1; }
-    .kpi-foot { color:var(--muted); font-size:10px; margin-top:8px; }
-    .kpi-card::after { content:""; position:absolute; width:65px; height:65px; border-radius:50%; right:-28px; bottom:-35px; background:var(--tint); }
-    .charts-grid { display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:19px; }
-    .chart-card { padding:19px 19px 13px; min-width:0; }
-    .chart-header { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
-    .chart-title { font-size:13px; font-weight:800; }
-    .chart-subtitle { font-size:10px; color:var(--muted); margin-top:4px; }
-    .download-btn { border:1px solid var(--line); background:#fff; border-radius:9px; color:#647187; font-size:10px; padding:7px 9px; font-weight:700; white-space:nowrap; }
-    .download-btn:hover { background:#f5f7fb; }
-    .legend { display:flex; flex-wrap:wrap; gap:11px; margin:15px 0 4px; }
-    .legend-item { display:flex; align-items:center; gap:5px; color:#718096; font-size:9px; }
-    .legend-dot { width:8px; height:8px; border-radius:3px; }
-    .chart-wrap { height:280px; position:relative; }
-    .table-card { padding:19px; }
-    .table-responsive { margin-top:14px; }
-    .table { --bs-table-bg:transparent; margin-bottom:0; font-size:11px; }
-    .table thead th { color:#8792a3; font-size:9px; letter-spacing:.5px; text-transform:uppercase; font-weight:800; border-bottom:1px solid var(--line); padding:11px 10px; white-space:nowrap; }
-    .table tbody td { padding:12px 10px; border-color:#f0f2f6; color:#4c596c; vertical-align:middle; }
-    .table tbody tr:last-child td { border-bottom:0; }
-    .table .school-cell { font-weight:700; color:#28364a; min-width:190px; white-space:normal; }
-    .table .num { font-variant-numeric:tabular-nums; text-align:right; }
-    .badge-level { display:inline-block; border-radius:6px; padding:4px 7px; font-size:9px; font-weight:800; }
-    .empty-state { padding:55px 10px; text-align:center; color:var(--muted); font-size:12px; }
-    .footer { display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; padding:19px 3px 0; color:#98a2b1; font-size:10px; }
-    .mobile-brand { display:none; }
-    #loadingOverlay { display:none; position:fixed; inset:0; background:rgba(244,247,251,.78); z-index:50; align-items:center; justify-content:center; backdrop-filter:blur(3px); }
+    .brand { display:flex; align-items:center; gap:.8rem; padding: .2rem .3rem 1.4rem;
+      border-bottom:1px solid rgba(255,255,255,.12); }
+    .brand-mark { width: 2.8rem; height: 2.8rem; border-radius: .9rem; display:grid; place-items:center;
+      background: linear-gradient(135deg,#6e8df1,#4366cb); font-size: 1.4rem;
+      box-shadow: 0 4px 14px rgba(110,141,241,.35); }
+    .brand-name { font-size: 1.15rem; font-weight: 800; letter-spacing:.3px; }
+    .brand-sub { font-size: .7rem; color:#aebbd0; letter-spacing:1.2px; text-transform:uppercase; margin-top:.15rem; }
+    .logo-slot { margin: 1.2rem .2rem 1.4rem; height: 6.5rem; border: 1px dashed rgba(255,255,255,.3);
+      border-radius: .9rem; display:grid; place-items:center; color:#aebbd0; font-size:.75rem;
+      overflow:hidden; background: rgba(255,255,255,.04); text-align: center; }
+    .logo-slot img { max-width: 90%; max-height: 90%; object-fit: contain; }
+    .side-label { color:#8fa1bb; font-size:.72rem; font-weight: 800; letter-spacing:1.3px;
+      text-transform: uppercase; margin: 0 .3rem .8rem; }
+    .filter-label { font-size:.82rem; color:#dbe4f1; font-weight: 600; margin:0 0 .45rem .1rem; display: block; }
+    .sidebar .form-select {
+      background-color: #203450; border: 1px solid #354b68; color: #fff;
+      border-radius: .7rem; min-height: 2.9rem; font-size: .88rem; padding: .5rem .8rem;
+    }
+    .sidebar .form-select:focus { border-color: #8199ef; box-shadow: 0 0 0 .2rem rgba(110,141,241,.2); }
+    .sidebar .form-select option { color: #202c3d; background: #fff; }
+    .filter-block { margin-bottom: 1.1rem; }
+    .side-note { margin-top: 1.2rem; padding: .8rem; background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.1); border-radius: .75rem;
+      color: #bdc9da; font-size: .78rem; line-height: 1.55; }
+    .sidebar-bottom { margin-top: auto; color: #8fa1bb; font-size: .72rem; padding: 1.1rem .2rem 0; }
+
+    /* Main */
+    .main {
+      margin-left: 280px; padding: 2rem 2.2rem 1.4rem;
+      width: calc(100% - 280px); max-width: 100%;
+    }
+    .topline { display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 1rem; flex-wrap: wrap; margin-bottom: 1.6rem; }
+    .eyebrow { font-size: .72rem; color: var(--blue); letter-spacing: 1.3px;
+      font-weight: 800; text-transform: uppercase; }
+    h1 { font-size: 1.7rem; font-weight: 800; letter-spacing: -.8px; margin: .3rem 0 .25rem; }
+    .subtitle { color: var(--muted); font-size: .9rem; }
+
+    .top-actions { display: flex; gap: .55rem; align-items: center; flex-wrap: wrap; }
+    .a11y-group {
+      display: inline-flex; gap: .25rem; background: var(--card);
+      border: 1px solid var(--line); border-radius: .75rem; padding: .25rem;
+    }
+    .btn-icon {
+      background: transparent; border: 0; color: var(--muted);
+      width: 2.3rem; height: 2.3rem; border-radius: .55rem;
+      display: inline-grid; place-items: center;
+      font-size: .85rem; font-weight: 800; cursor: pointer;
+      transition: background .15s, color .15s;
+    }
+    .btn-icon:hover { background: rgba(66,100,198,.1); color: var(--blue); }
+    .btn-icon[aria-pressed="true"] { background: var(--blue); color: #fff; }
+
+    .btn-upload {
+      background: var(--navy); color: #fff; border: 0; border-radius: .7rem;
+      padding: .7rem 1rem; font-size: .85rem; font-weight: 700;
+      box-shadow: 0 5px 14px rgba(20,35,59,.18);
+      cursor: pointer; display: inline-flex; align-items: center; gap: .35rem;
+    }
+    .btn-upload:hover { background: #263e61; }
+    .btn-soft {
+      border: 1px solid var(--line); background: var(--card); color: var(--ink);
+      border-radius: .7rem; padding: .65rem .9rem; font-size: .85rem; font-weight: 700;
+      cursor: pointer; display: inline-flex; align-items: center; gap: .35rem;
+    }
+    .btn-soft:hover { background: var(--canvas); }
+
+    .context-bar {
+      background: #eaf0ff; border: 1px solid #dce6ff; color: #435a94;
+      padding: .75rem 1rem; border-radius: .75rem; font-size: .82rem;
+      margin-bottom: 1.2rem; display: flex; align-items: center; gap: .55rem;
+    }
+    html[data-theme="dark"] .context-bar {
+      background: #1c2a44; border-color: #2b3d5c; color: #b7c7e4;
+    }
+
+    .section-heading { font-size: 1rem; font-weight: 800; margin: 0; }
+    .section-caption { color: var(--muted); font-size: .78rem; margin-top: .2rem; }
+
+    /* KPIs */
+    .kpi-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr));
+      gap: .9rem; margin: 1rem 0 1.4rem; }
+    .kpi-card, .chart-card, .table-card {
+      background: var(--card); border: 1px solid var(--line);
+      border-radius: var(--radius); box-shadow: var(--shadow);
+      transition: background-color .25s ease, border-color .25s ease;
+    }
+    .kpi-card { padding: 1.15rem 1.2rem; position: relative; overflow: hidden; }
+    .kpi-top { display:flex; justify-content:space-between; align-items:center; gap:.5rem; }
+    .kpi-label { color: var(--muted); font-size: .82rem; font-weight: 600; }
+    .kpi-icon { width: 2.5rem; height: 2.5rem; display:grid; place-items:center;
+      border-radius: .75rem; font-size: 1.15rem; }
+    .kpi-value { font-size: 2rem; font-weight: 800; letter-spacing: -1px;
+      margin-top: .9rem; line-height: 1; }
+    .kpi-foot { color: var(--muted); font-size: .78rem; margin-top: .5rem; }
+    .kpi-card::after {
+      content:""; position:absolute; width:4.2rem; height:4.2rem; border-radius:50%;
+      right:-1.8rem; bottom:-2.2rem; background: var(--tint);
+    }
+
+    /* Charts */
+    .charts-grid { display: grid; grid-template-columns: 1fr 1fr;
+      gap: 1rem; margin-bottom: 1.4rem; }
+    .chart-card { padding: 1.2rem 1.2rem .9rem; min-width: 0; }
+    .chart-header { display:flex; justify-content:space-between; align-items:flex-start; gap:.8rem; }
+    .chart-title { font-size: 1rem; font-weight: 800; }
+    .chart-subtitle { font-size: .78rem; color: var(--muted); margin-top: .25rem; }
+    .download-btn { border: 1px solid var(--line); background: var(--card);
+      border-radius: .55rem; color: var(--muted); font-size: .78rem;
+      padding: .45rem .65rem; font-weight: 700; white-space: nowrap; cursor: pointer; }
+    .download-btn:hover { background: var(--canvas); color: var(--ink); }
+    .legend { display:flex; flex-wrap:wrap; gap:.85rem; margin: 1rem 0 .35rem; }
+    .legend-item { display:flex; align-items:center; gap:.4rem;
+      color: var(--muted); font-size: .78rem; font-weight: 600; }
+    .legend-dot { width:.6rem; height:.6rem; border-radius:.2rem; }
+    .chart-wrap { position: relative; height: 320px; }
+    #percentChartWrap { min-height: 340px; }
+
+    /* Table */
+    .table-card { padding: 1.2rem; }
+    .table-responsive { margin-top: .9rem; }
+    .table { --bs-table-bg: transparent; margin-bottom: 0; font-size: .88rem; color: var(--ink); }
+    .table thead th {
+      color: var(--muted); font-size: .72rem; letter-spacing:.5px;
+      text-transform: uppercase; font-weight: 800;
+      border-bottom: 1px solid var(--line); padding: .8rem .6rem;
+      white-space: nowrap; background: transparent;
+    }
+    .table tbody td {
+      padding: .85rem .6rem; border-color: var(--line);
+      color: var(--ink); vertical-align: middle;
+    }
+    .table tbody tr:last-child td { border-bottom: 0; }
+    .table tbody tr:hover { background: rgba(66,100,198,.05); }
+    .table .school-cell { font-weight: 700; min-width: 12rem; white-space: normal; }
+    .table .num { font-variant-numeric: tabular-nums; text-align: right; }
+    .empty-state { padding: 3.5rem 1rem; text-align:center;
+      color: var(--muted); font-size: .95rem; }
+
+    /* Footer */
+    .footer {
+      display: flex; justify-content: space-between; gap: 1rem;
+      flex-wrap: wrap; padding: 1.5rem .2rem .2rem;
+      color: var(--muted); font-size: .78rem;
+      border-top: 1px solid var(--line); margin-top: 1.5rem;
+    }
+    .footer strong { color: var(--ink); }
+    .footer .copy { display: block; font-size: .72rem; margin-top: .15rem; }
+
+    #loadingOverlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(244,247,251,.82); z-index: 50;
+      align-items: center; justify-content: center;
+      backdrop-filter: blur(3px);
+    }
+    html[data-theme="dark"] #loadingOverlay { background: rgba(13,20,32,.82); }
     #loadingOverlay.show { display:flex; }
-    .loading-box { background:#fff; padding:22px 28px; border-radius:16px; box-shadow:var(--shadow); font-size:12px; font-weight:700; }
-    @media(max-width:1100px) { .sidebar{width:235px}.main{margin-left:235px;padding:26px 22px}.kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.charts-grid{grid-template-columns:1fr} }
-    @media(max-width:700px) {
-      .sidebar{position:relative;width:100%;min-height:0;padding:15px 16px 17px}
-      .brand{padding-bottom:13px}.logo-slot{display:none}.sidebar-bottom{display:none}
-      .sidebar .filter-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.filter-block{margin:0}
-      .side-note{margin-top:12px}
-      .main{margin:0;padding:22px 14px}
-      h1{font-size:22px}.topline{align-items:flex-start}
-      .kpi-grid{gap:9px}.kpi-card{padding:13px}.kpi-value{font-size:23px}
-      .chart-card,.table-card{padding:15px}.chart-wrap{height:255px}
+    .loading-box { background: var(--card); padding: 1.4rem 1.8rem;
+      border-radius: 1rem; box-shadow: var(--shadow);
+      font-size: .95rem; font-weight: 700; color: var(--ink); }
+
+    /* Responsivo */
+    @media (max-width: 1200px) {
+      .sidebar { width: 250px; }
+      .main { margin-left: 250px; width: calc(100% - 250px); padding: 1.6rem 1.4rem 1rem; }
+      .kpi-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .charts-grid { grid-template-columns: 1fr; }
     }
-    @media(max-width:390px){.sidebar .filter-row{grid-template-columns:1fr}.top-actions{width:100%}.top-actions>*{flex:1}}
+    @media (max-width: 760px) {
+      .app-shell { flex-direction: column; }
+      .sidebar { position: relative; width: 100%; min-height: 0; padding: 1rem; }
+      .brand { padding-bottom: .8rem; }
+      .logo-slot { display: none; }
+      .sidebar-bottom { display: none; }
+      .sidebar .filter-row { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
+      .filter-block { margin: 0; }
+      .side-note { margin-top: .8rem; }
+      .main { margin: 0; width: 100%; padding: 1.2rem .9rem; }
+      h1 { font-size: 1.35rem; }
+      .topline { gap: .7rem; }
+      .top-actions { gap: .4rem; }
+      .kpi-grid { gap: .6rem; }
+      .kpi-card { padding: .85rem; }
+      .kpi-value { font-size: 1.6rem; margin-top: .65rem; }
+      .chart-card, .table-card { padding: 1rem; }
+      .chart-wrap { height: 280px; }
+    }
+    @media (max-width: 420px) {
+      .sidebar .filter-row { grid-template-columns: 1fr; }
+      .a11y-group { width: 100%; justify-content: space-between; }
+      .top-actions > label { flex: 1; justify-content: center; }
+    }
   </style>
 </head>
 <body>
-<div class="app-shell">
-  <aside class="sidebar">
-    <div class="brand">
-      <div class="brand-mark"><i class="bi bi-bar-chart-line-fill"></i></div>
-      <div><div class="brand-name">AMI <span style="color:#91aaff">DASHBOARD</span></div><div class="brand-sub">Monitoramento educacional</div></div>
-    </div>
+  <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
 
-    <div class="logo-slot" id="logoPreview">
-      <div class="text-center"><i class="bi bi-image" style="font-size:23px"></i><div class="mt-2">ESPAÇO PARA LOGOTIPO</div></div>
-    </div>
-
-    <div class="side-label"><i class="bi bi-sliders me-1"></i> Filtros de análise</div>
-    <div class="filter-row">
-      <div class="filter-block">
-        <label class="filter-label" for="schoolFilter">Escola / LOCAL</label>
-        <select class="form-select" id="schoolFilter"><option value="">Todas as escolas</option></select>
-      </div>
-      <div class="filter-block">
-        <label class="filter-label" for="classFilter">Turma</label>
-        <select class="form-select" id="classFilter" disabled><option value="">Todas as turmas</option></select>
-      </div>
-    </div>
-    <div class="side-note"><i class="bi bi-info-circle me-1"></i> Os filtros são integrados. Ao selecionar uma escola, a lista de turmas é atualizada e todos os indicadores e gráficos são recalculados.</div>
-    <div class="sidebar-bottom"><i class="bi bi-shield-check me-1"></i> Análise local dos dados no navegador</div>
-  </aside>
-
-  <main class="main">
-    <header class="topline">
-      <div>
-        <div class="eyebrow">Painel de indicadores educacionais</div>
-        <h1>Avaliação da Aprendizagem</h1>
-        <div class="subtitle">Acompanhamento dos níveis de desempenho por escola e turma.</div>
-      </div>
-      <div class="top-actions">
-        <label class="btn-upload mb-0" for="xlsxInput" style="cursor:pointer"><i class="bi bi-file-earmark-arrow-up me-1"></i> Carregar XLSX</label>
-        <input type="file" id="xlsxInput" accept=".xlsx,.xls" hidden>
-        <label class="btn-soft mb-0" for="logoInput" style="cursor:pointer"><i class="bi bi-image me-1"></i> Logotipo</label>
-        <input type="file" id="logoInput" accept="image/*" hidden>
-        <button class="btn-soft" id="resetFilters"><i class="bi bi-arrow-counterclockwise me-1"></i> Limpar</button>
-      </div>
-    </header>
-
-    <div class="context-bar" id="dataStatus">
-      <i class="bi bi-cloud-check"></i>
-      <span>Carregando a base de dados bd_ami.xlsx...</span>
-    </div>
-
-    <div class="d-flex justify-content-between align-items-end flex-wrap gap-2">
-      <div><div class="section-heading">Resumo dos resultados</div><div class="section-caption" id="selectionCaption">Todas as escolas · Todas as turmas</div></div>
-      <div class="section-caption" id="recordCount">Aguardando dados</div>
-    </div>
-
-    <section class="kpi-grid">
-      <article class="kpi-card" style="--tint:#eaf0ff">
-        <div class="kpi-top"><div class="kpi-label">Total de estudantes</div><div class="kpi-icon" style="background:#eaf0ff;color:#5276d8"><i class="bi bi-people-fill"></i></div></div>
-        <div class="kpi-value" id="kpiTotal">—</div><div class="kpi-foot">Estudantes contabilizados no recorte</div>
-      </article>
-      <article class="kpi-card" style="--tint:#fff0ef">
-        <div class="kpi-top"><div class="kpi-label">Abaixo do crítico</div><div class="kpi-icon" style="background:#fff0ef;color:var(--red)"><i class="bi bi-graph-down-arrow"></i></div></div>
-        <div class="kpi-value" id="kpiBelow" style="color:var(--red)">—</div><div class="kpi-foot" id="kpiBelowPct">— do total</div>
-      </article>
-      <article class="kpi-card" style="--tint:#fff8e6">
-        <div class="kpi-top"><div class="kpi-label">Nível crítico</div><div class="kpi-icon" style="background:#fff8e6;color:#b78c16"><i class="bi bi-exclamation-triangle-fill"></i></div></div>
-        <div class="kpi-value" id="kpiCritical" style="color:#b78c16">—</div><div class="kpi-foot" id="kpiCriticalPct">— do total</div>
-      </article>
-      <article class="kpi-card" style="--tint:#eaf6ef">
-        <div class="kpi-top"><div class="kpi-label">Intermediário + desejável</div><div class="kpi-icon" style="background:#eaf6ef;color:var(--green)"><i class="bi bi-check2-circle"></i></div></div>
-        <div class="kpi-value" id="kpiPositive" style="color:var(--green)">—</div><div class="kpi-foot" id="kpiPositivePct">— do total</div>
-      </article>
-    </section>
-
-    <section class="charts-grid">
-      <article class="chart-card">
-        <div class="chart-header">
-          <div><div class="chart-title">Quantidade por categoria</div><div class="chart-subtitle" id="countChartSubtitle">Comparação entre escolas</div></div>
-          <button class="download-btn" data-download="countChart"><i class="bi bi-download me-1"></i> PNG</button>
+  <div class="app-shell">
+    <aside class="sidebar" role="complementary" aria-label="Filtros de análise">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"><i class="bi bi-bar-chart-line-fill"></i></div>
+        <div>
+          <div class="brand-name">AMI <span style="color:#91aaff">DASHBOARD</span></div>
+          <div class="brand-sub">Monitoramento educacional</div>
         </div>
-        <div class="legend">
-          <span class="legend-item"><i class="legend-dot" style="background:var(--red)"></i>Abaixo crítico</span>
-          <span class="legend-item"><i class="legend-dot" style="background:var(--yellow)"></i>Crítico</span>
-          <span class="legend-item"><i class="legend-dot" style="background:var(--light-green)"></i>Intermediário</span>
-          <span class="legend-item"><i class="legend-dot" style="background:var(--green)"></i>Desejável</span>
-        </div>
-        <div class="chart-wrap"><canvas id="countChart"></canvas></div>
-      </article>
-
-      <article class="chart-card">
-        <div class="chart-header">
-          <div><div class="chart-title">Distribuição percentual por nível</div><div class="chart-subtitle" id="percentChartSubtitle">Composição de cada escola · 100%</div></div>
-          <button class="download-btn" data-download="percentChart"><i class="bi bi-download me-1"></i> PNG</button>
-        </div>
-        <div class="legend">
-          <span class="legend-item"><i class="legend-dot" style="background:var(--red)"></i>Abaixo crítico</span>
-          <span class="legend-item"><i class="legend-dot" style="background:var(--yellow)"></i>Crítico</span>
-          <span class="legend-item"><i class="legend-dot" style="background:var(--light-green)"></i>Intermediário</span>
-          <span class="legend-item"><i class="legend-dot" style="background:var(--green)"></i>Desejável</span>
-        </div>
-        <div class="chart-wrap"><canvas id="percentChart"></canvas></div>
-      </article>
-    </section>
-
-    <section class="table-card">
-      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <div><div class="section-heading">Detalhamento dos registros</div><div class="section-caption">Valores consolidados de acordo com os filtros aplicados</div></div>
-        <button class="btn-soft" id="exportCsv"><i class="bi bi-filetype-csv me-1"></i> Exportar CSV</button>
       </div>
-      <div class="table-responsive">
-        <table class="table align-middle">
-          <thead><tr><th>Escola</th><th>Turma</th><th class="text-end">Abaixo crítico</th><th class="text-end">Crítico</th><th class="text-end">Intermediário</th><th class="text-end">Desejável</th><th class="text-end">Total</th></tr></thead>
-          <tbody id="dataTable"><tr><td colspan="7"><div class="empty-state"><i class="bi bi-file-earmark-spreadsheet fs-2 d-block mb-2"></i>Carregando os dados da planilha...</div></td></tr></tbody>
-        </table>
+
+      <div class="logo-slot" id="logoPreview" aria-label="Espaço para logotipo">
+        <div><i class="bi bi-image" style="font-size:1.4rem"></i><div class="mt-1">ESPAÇO PARA LOGOTIPO</div></div>
       </div>
-    </section>
 
-    <footer class="footer">
-      <span>AMI · Painel de Monitoramento da Aprendizagem</span>
-      <span id="lastUpdate">Atualização automática conforme os filtros</span>
-    </footer>
-  </main>
-</div>
+      <div class="side-label"><i class="bi bi-sliders me-1"></i> Filtros de análise</div>
+      <div class="filter-row">
+        <div class="filter-block">
+          <label class="filter-label" for="schoolFilter">Escola / Local</label>
+          <select class="form-select" id="schoolFilter"><option value="">Todas as escolas</option></select>
+        </div>
+        <div class="filter-block">
+          <label class="filter-label" for="classFilter">Turma</label>
+          <select class="form-select" id="classFilter" disabled><option value="">Todas as turmas</option></select>
+        </div>
+      </div>
+      <div class="side-note"><i class="bi bi-info-circle me-1"></i> Os filtros são integrados. Ao selecionar uma escola, a lista de turmas é atualizada e todos os indicadores e gráficos são recalculados.</div>
+      <div class="sidebar-bottom"><i class="bi bi-shield-check me-1"></i> Análise local dos dados no navegador</div>
+    </aside>
 
-<div id="loadingOverlay"><div class="loading-box"><span class="spinner-border spinner-border-sm me-2"></span> Processando planilha...</div></div>
+    <main class="main" id="main-content" role="main">
+      <header class="topline">
+        <div>
+          <div class="eyebrow">Painel de indicadores educacionais</div>
+          <h1>Avaliação da Aprendizagem</h1>
+          <div class="subtitle">Acompanhamento dos níveis de desempenho por escola e turma.</div>
+        </div>
+        <div class="top-actions">
+          <div class="a11y-group" role="group" aria-label="Ferramentas de acessibilidade">
+            <button class="btn-icon" id="fontMinus" aria-label="Diminuir tamanho da fonte" title="Diminuir fonte">A−</button>
+            <button class="btn-icon" id="fontPlus" aria-label="Aumentar tamanho da fonte" title="Aumentar fonte">A+</button>
+            <button class="btn-icon" id="dyslexiaToggle" aria-label="Ativar modo dislexia" aria-pressed="false" title="Modo dislexia"><i class="bi bi-book" aria-hidden="true"></i></button>
+            <button class="btn-icon" id="themeToggle" aria-label="Ativar modo escuro" aria-pressed="false" title="Alternar tema"><i class="bi bi-moon-stars-fill" id="themeIcon" aria-hidden="true"></i></button>
+          </div>
+          <label class="btn-upload mb-0" for="xlsxInput" style="cursor:pointer"><i class="bi bi-file-earmark-arrow-up me-1" aria-hidden="true"></i> Carregar XLSX</label>
+          <input type="file" id="xlsxInput" accept=".xlsx,.xls" hidden>
+          <label class="btn-soft mb-0" for="logoInput" style="cursor:pointer"><i class="bi bi-image me-1" aria-hidden="true"></i> Logotipo</label>
+          <input type="file" id="logoInput" accept="image/*" hidden>
+          <button class="btn-soft" id="resetFilters"><i class="bi bi-arrow-counterclockwise me-1" aria-hidden="true"></i> Limpar</button>
+        </div>
+      </header>
 
-<!-- Bibliotecas de gráficos e leitura XLSX -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+      <div class="context-bar" id="dataStatus" role="status" aria-live="polite">
+        <i class="bi bi-cloud-check" aria-hidden="true"></i>
+        <span>Carregando a base de dados bd_ami.xlsx...</span>
+      </div>
 
-<script>
-(() => {
-  "use strict";
+      <div class="d-flex justify-content-between align-items-end flex-wrap gap-2">
+        <div>
+          <div class="section-heading">Resumo dos resultados</div>
+          <div class="section-caption" id="selectionCaption">Todas as escolas · Todas as turmas</div>
+        </div>
+        <div class="section-caption" id="recordCount">Aguardando dados</div>
+      </div>
 
-  const FILE_NAME = "bd_ami.xlsx";
-  const COLORS = ["#dc4545", "#e8bd42", "#91cda9", "#176b43"];
-  const LABELS = ["Abaixo do crítico", "Crítico", "Intermediário", "Desejável"];
-  const FIELDS = ["ABAIXO_CRITICO", "CRITICO", "INTERMEDIARIO", "DESEJAVEL"];
-  let records = [];
-  let filteredRecords = [];
-  let countChart = null;
-  let percentChart = null;
-  let currentFileName = FILE_NAME;
+      <section class="kpi-grid" aria-label="Indicadores principais">
+        <article class="kpi-card" style="--tint:#eaf0ff" aria-label="Total de estudantes">
+          <div class="kpi-top">
+            <div class="kpi-label">Total de estudantes</div>
+            <div class="kpi-icon" style="background:#eaf0ff;color:#4264c6" aria-hidden="true"><i class="bi bi-people-fill"></i></div>
+          </div>
+          <div class="kpi-value" id="kpiTotal">—</div>
+          <div class="kpi-foot">Estudantes contabilizados no recorte</div>
+        </article>
+        <article class="kpi-card" style="--tint:#ffefee" aria-label="Estudantes abaixo do crítico">
+          <div class="kpi-top">
+            <div class="kpi-label">Abaixo do crítico</div>
+            <div class="kpi-icon" style="background:#ffefee;color:var(--red)" aria-hidden="true"><i class="bi bi-graph-down-arrow"></i></div>
+          </div>
+          <div class="kpi-value" id="kpiBelow" style="color:var(--red)">—</div>
+          <div class="kpi-foot" id="kpiBelowPct">— do total</div>
+        </article>
+        <article class="kpi-card" style="--tint:#fff7e0" aria-label="Estudantes em nível crítico">
+          <div class="kpi-top">
+            <div class="kpi-label">Nível crítico</div>
+            <div class="kpi-icon" style="background:#fff7e0;color:#9a7608" aria-hidden="true"><i class="bi bi-exclamation-triangle-fill"></i></div>
+          </div>
+          <div class="kpi-value" id="kpiCritical" style="color:#9a7608">—</div>
+          <div class="kpi-foot" id="kpiCriticalPct">— do total</div>
+        </article>
+        <article class="kpi-card" style="--tint:#e8f6ee" aria-label="Estudantes em nível intermediário e desejável">
+          <div class="kpi-top">
+            <div class="kpi-label">Intermediário + desejável</div>
+            <div class="kpi-icon" style="background:#e8f6ee;color:var(--green)" aria-hidden="true"><i class="bi bi-check2-circle"></i></div>
+          </div>
+          <div class="kpi-value" id="kpiPositive" style="color:var(--green)">—</div>
+          <div class="kpi-foot" id="kpiPositivePct">— do total</div>
+        </article>
+      </section>
 
-  const $ = id => document.getElementById(id);
-  const fmt = n => Number(n || 0).toLocaleString("pt-BR", { maximumFractionDigits: 0 });
-  const pct = (n, total) => total ? (100 * n / total).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + "%" : "0,0%";
-  const cleanText = v => String(v ?? "").replace(/\s+/g, " ").trim();
-  const normalizeHeader = s => String(s ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toUpperCase().replace(/\s+/g, "_").replace(/%/g, "");
+      <section class="charts-grid" aria-label="Gráficos comparativos">
+        <article class="chart-card">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Quantidade por categoria</div>
+              <div class="chart-subtitle" id="countChartSubtitle">Comparação entre escolas</div>
+            </div>
+            <button class="download-btn" data-download="countChart" aria-label="Baixar gráfico em PNG"><i class="bi bi-download me-1" aria-hidden="true"></i> PNG</button>
+          </div>
+          <div class="legend" aria-label="Legenda dos níveis">
+            <span class="legend-item"><i class="legend-dot" style="background:var(--red)" aria-hidden="true"></i>Abaixo crítico</span>
+            <span class="legend-item"><i class="legend-dot" style="background:var(--yellow)" aria-hidden="true"></i>Crítico</span>
+            <span class="legend-item"><i class="legend-dot" style="background:var(--light-green)" aria-hidden="true"></i>Intermediário</span>
+            <span class="legend-item"><i class="legend-dot" style="background:var(--green)" aria-hidden="true"></i>Desejável</span>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="countChart" role="img" aria-label="Gráfico de barras verticais com a quantidade de estudantes por nível de aprendizagem"></canvas>
+          </div>
+        </article>
 
-  function parseNumber(value) {
-    if (typeof value === "number") return Number.isFinite(value) ? value : 0;
-    let s = String(value ?? "").trim().replace(/\s/g, "");
-    if (!s) return 0;
-    if (s.includes(",")) s = s.replace(/\./g, "").replace(",", ".");
-    const n = Number(s);
-    return Number.isFinite(n) ? n : 0;
-  }
+        <article class="chart-card">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Distribuição percentual por nível</div>
+              <div class="chart-subtitle" id="percentChartSubtitle">Composição de cada escola · 100%</div>
+            </div>
+            <button class="download-btn" data-download="percentChart" aria-label="Baixar gráfico em PNG"><i class="bi bi-download me-1" aria-hidden="true"></i> PNG</button>
+          </div>
+          <div class="legend" aria-label="Legenda dos níveis">
+            <span class="legend-item"><i class="legend-dot" style="background:var(--red)" aria-hidden="true"></i>Abaixo crítico</span>
+            <span class="legend-item"><i class="legend-dot" style="background:var(--yellow)" aria-hidden="true"></i>Crítico</span>
+            <span class="legend-item"><i class="legend-dot" style="background:var(--light-green)" aria-hidden="true"></i>Intermediário</span>
+            <span class="legend-item"><i class="legend-dot" style="background:var(--green)" aria-hidden="true"></i>Desejável</span>
+          </div>
+          <div class="chart-wrap" id="percentChartWrap">
+            <canvas id="percentChart" role="img" aria-label="Gráfico de barras horizontais 100% empilhadas com a distribuição percentual dos níveis por escola"></canvas>
+          </div>
+        </article>
+      </section>
 
-  function setStatus(message, type = "info") {
-    const el = $("dataStatus");
-    const icon = type === "success" ? "bi-check-circle-fill" : type === "error" ? "bi-exclamation-circle-fill" : "bi-info-circle";
-    el.innerHTML = `<i class="bi ${icon}"></i><span>${escapeHtml(message)}</span>`;
-    el.style.background = type === "error" ? "#fff0ef" : type === "success" ? "#eaf6ef" : "#eaf0ff";
-    el.style.borderColor = type === "error" ? "#f4d4d1" : type === "success" ? "#d6eadc" : "#dce6ff";
-    el.style.color = type === "error" ? "#a83b35" : type === "success" ? "#246c45" : "#4b619c";
-  }
+      <section class="table-card" aria-label="Detalhamento dos registros">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <div>
+            <div class="section-heading">Detalhamento dos registros</div>
+            <div class="section-caption">Valores consolidados de acordo com os filtros aplicados</div>
+          </div>
+          <button class="btn-soft" id="exportCsv"><i class="bi bi-filetype-csv me-1" aria-hidden="true"></i> Exportar CSV</button>
+        </div>
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+              <tr>
+                <th scope="col">Escola</th>
+                <th scope="col">Turma</th>
+                <th scope="col" class="text-end">Abaixo crítico</th>
+                <th scope="col" class="text-end">Crítico</th>
+                <th scope="col" class="text-end">Intermediário</th>
+                <th scope="col" class="text-end">Desejável</th>
+                <th scope="col" class="text-end">Total</th>
+              </tr>
+            </thead>
+            <tbody id="dataTable">
+              <tr><td colspan="7"><div class="empty-state"><i class="bi bi-file-earmark-spreadsheet fs-2 d-block mb-2" aria-hidden="true"></i>Carregando os dados da planilha...</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
 
-  function escapeHtml(value) {
-    return String(value ?? "").replace(/[&<>"']/g, c => ({
-      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-    })[c]);
-  }
+      <footer class="footer" role="contentinfo">
+        <div>
+          <strong>AMI · Painel de Monitoramento da Aprendizagem</strong>
+          <span class="copy">© <span id="currentYear">2025</span> Todos os direitos reservados · Uso educacional e institucional</span>
+        </div>
+        <span id="lastUpdate">Atualização automática conforme os filtros</span>
+      </footer>
+    </main>
+  </div>
 
-  function normalizeRows(jsonRows) {
-    if (!jsonRows.length) throw new Error("A primeira aba da planilha está vazia.");
-    const mapped = jsonRows.map(raw => {
-      const obj = {};
-      Object.entries(raw).forEach(([key, value]) => obj[normalizeHeader(key)] = value);
-      return obj;
-    });
-    const required = ["LOCAL", "TURMA", ...FIELDS];
-    const headers = Object.keys(mapped[0]);
-    const missing = required.filter(field => !headers.includes(field));
-    if (missing.length) throw new Error("Colunas obrigatórias ausentes: " + missing.join(", "));
+  <div id="loadingOverlay" role="status" aria-live="polite">
+    <div class="loading-box"><span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span> Processando planilha...</div>
+  </div>
 
-    const normalized = mapped.map((r, index) => {
-      const item = { LOCAL: cleanText(r.LOCAL), TURMA: cleanText(r.TURMA) };
-      FIELDS.forEach(field => item[field] = parseNumber(r[field]));
-      if (!item.LOCAL || !item.TURMA) return null;
-      if (FIELDS.some(field => item[field] < 0)) throw new Error(`Valor negativo encontrado na linha ${index + 2}.`);
-      return item;
-    }).filter(Boolean);
+  <!-- VLibras (Libras) -->
+  <div vw class="enabled">
+    <div vw-access-button class="active"></div>
+    <div vw-plugin-wrapper>
+      <div class="vw-plugin-top-wrapper"></div>
+    </div>
+  </div>
 
-    if (!normalized.length) throw new Error("Não foram encontrados registros válidos.");
-    return normalized;
-  }
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+  <script>
+    new window.VLibras.Widget('https://vlibras.gov.br/app');
+  </script>
 
-  function populateSchools() {
-    const schoolSelect = $("schoolFilter");
-    const previous = schoolSelect.value;
-    schoolSelect.innerHTML = '<option value="">Todas as escolas</option>';
-    [...new Set(records.map(r => r.LOCAL))].sort((a,b) => a.localeCompare(b, "pt-BR")).forEach(name => {
-      schoolSelect.add(new Option(name, name));
-    });
-    if ([...schoolSelect.options].some(o => o.value === previous)) schoolSelect.value = previous;
-    populateClasses();
-  }
+  <script>
+  (() => {
+    "use strict";
 
-  function populateClasses() {
-    const selectedSchool = $("schoolFilter").value;
-    const classSelect = $("classFilter");
-    const previous = classSelect.value;
-    classSelect.innerHTML = '<option value="">Todas as turmas</option>';
-    const classes = [...new Set(records.filter(r => !selectedSchool || r.LOCAL === selectedSchool).map(r => r.TURMA))].sort((a,b) => a.localeCompare(b, "pt-BR"));
-    classes.forEach(name => classSelect.add(new Option(name, name)));
-    classSelect.disabled = !selectedSchool;
-    if (classes.includes(previous)) classSelect.value = previous;
-  }
+    const FILE_NAME = "bd_ami.xlsx";
+    const COLORS = ["#d93b3b", "#e0ab1f", "#7fc79b", "#0f5e3c"];
+    const DL_TEXT = ["#ffffff", "#2a2a2a", "#0a2e1e", "#ffffff"]; // contraste por segmento
+    const LABELS = ["Abaixo do crítico", "Crítico", "Intermediário", "Desejável"];
+    const FIELDS = ["ABAIXO_CRITICO", "CRITICO", "INTERMEDIARIO", "DESEJAVEL"];
 
-  function aggregate(list) {
-    const totals = FIELDS.map(field => list.reduce((sum, row) => sum + row[field], 0));
-    return { totals, total: totals.reduce((sum, value) => sum + value, 0) };
-  }
+    let records = [];
+    let filteredRecords = [];
+    let currentGroups = null;
+    let countChart = null;
+    let percentChart = null;
+    let currentFileName = FILE_NAME;
 
-  function groupData(list, schoolSelected) {
-    const groups = new Map();
-    list.forEach(row => {
-      const key = schoolSelected ? row.TURMA : row.LOCAL;
-      if (!groups.has(key)) groups.set(key, FIELDS.map(() => 0));
-      FIELDS.forEach((field, i) => groups.get(key)[i] += row[field]);
-    });
-    return [...groups.entries()].sort((a,b) => a[0].localeCompare(b[0], "pt-BR"));
-  }
+    const $ = id => document.getElementById(id);
+    const fmt = n => Number(n || 0).toLocaleString("pt-BR", { maximumFractionDigits: 0 });
+    const pct = (n, total) => total
+      ? (100 * n / total).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + "%"
+      : "0,0%";
+    const cleanText = v => String(v ?? "").replace(/\s+/g, " ").trim();
+    const normalizeHeader = s => String(s ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .trim().toUpperCase().replace(/\s+/g, "_").replace(/%/g, "");
 
-  function chartOptions(stacked = false, percent = false) {
-    return {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: { mode: "index", intersect: false },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: "#14233b", padding: 11, cornerRadius: 9,
-          titleFont: { family: "DM Sans", size: 11, weight: "700" },
-          bodyFont: { family: "DM Sans", size: 11 },
-          callbacks: {
-            label: context => `${context.dataset.label}: ${percent ? context.parsed.y.toLocaleString("pt-BR", {maximumFractionDigits:1}) + "%" : fmt(context.parsed.y)}`
-          }
-        }
-      },
-      scales: {
-        x: {
-          stacked, grid: { display: false },
-          ticks: { color: "#8792a3", font: { family: "DM Sans", size: 9 }, maxRotation: 35, minRotation: 0, autoSkip: true },
-          border: { display: false }
-        },
-        y: {
-          stacked, beginAtZero: true, max: percent ? 100 : undefined,
-          ticks: { color: "#8792a3", font: { family: "DM Sans", size: 9 }, callback: value => percent ? value + "%" : fmt(value) },
-          grid: { color: "#edf0f5", drawTicks: false },
-          border: { display: false }
-        }
+    // Compatível com escala tipográfica (rem base)
+    const rootFS = () => parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+    const chartFS = basePx => Math.max(11, Math.round(basePx * rootFS() / 16));
+    const chartFontFamily = () => document.body.classList.contains("dyslexia")
+      ? "'Open-Dyslexic', 'Atkinson Hyperlegible', sans-serif"
+      : "'DM Sans', sans-serif";
+
+    function getTheme() {
+      return document.documentElement.getAttribute("data-theme") || "light";
+    }
+
+    function getChartTheme() {
+      const dark = getTheme() === "dark";
+      return {
+        text: dark ? "#98a9c0" : "#5a6779",
+        category: dark ? "#d1dbe9" : "#3a4a5f",
+        grid: dark ? "rgba(255,255,255,0.08)" : "rgba(226,232,240,0.85)",
+        tooltipBg: dark ? "#0a1420" : "#14233b",
+        labelLight: dark ? "#e5edf7" : "#1a2433"
+      };
+    }
+
+    function parseNumber(value) {
+      if (typeof value === "number") return Number.isFinite(value) ? value : 0;
+      let s = String(value ?? "").trim().replace(/\s/g, "");
+      if (!s) return 0;
+      if (s.includes(",")) s = s.replace(/\./g, "").replace(",", ".");
+      const n = Number(s);
+      return Number.isFinite(n) ? n : 0;
+    }
+
+    function setStatus(message, type = "info") {
+      const el = $("dataStatus");
+      const icon = type === "success" ? "bi-check-circle-fill"
+        : type === "error" ? "bi-exclamation-circle-fill"
+        : "bi-info-circle";
+      el.innerHTML = `<i class="bi ${icon}" aria-hidden="true"></i><span>${escapeHtml(message)}</span>`;
+      if (type === "error") {
+        el.style.background = getTheme() === "dark" ? "#3a1e1e" : "#fff0ef";
+        el.style.borderColor = getTheme() === "dark" ? "#5a2b2b" : "#f4d4d1";
+        el.style.color = getTheme() === "dark" ? "#ffb4ae" : "#a83b35";
+      } else if (type === "success") {
+        el.style.background = getTheme() === "dark" ? "#163525" : "#eaf6ef";
+        el.style.borderColor = getTheme() === "dark" ? "#1f4b32" : "#d6eadc";
+        el.style.color = getTheme() === "dark" ? "#8fdcae" : "#246c45";
+      } else {
+        el.style.background = getTheme() === "dark" ? "#1c2a44" : "#eaf0ff";
+        el.style.borderColor = getTheme() === "dark" ? "#2b3d5c" : "#dce6ff";
+        el.style.color = getTheme() === "dark" ? "#b7c7e4" : "#4b619c";
       }
-    };
-  }
-
-  function buildCharts(groups) {
-    const labels = groups.map(([name]) => name);
-    const countDatasets = FIELDS.map((field, i) => ({
-      label: LABELS[i], data: groups.map(([, values]) => values[i]),
-      backgroundColor: COLORS[i], borderRadius: 4, borderSkipped: false, maxBarThickness: 34
-    }));
-    const percentDatasets = FIELDS.map((field, i) => ({
-      label: LABELS[i],
-      data: groups.map(([, values]) => {
-        const total = values.reduce((a,b) => a + b, 0);
-        return total ? values[i] / total * 100 : 0;
-      }),
-      backgroundColor: COLORS[i], borderRadius: 2, borderSkipped: false, maxBarThickness: 38
-    }));
-
-    if (countChart) countChart.destroy();
-    if (percentChart) percentChart.destroy();
-
-    countChart = new Chart($("countChart"), {
-      type: "bar", data: { labels, datasets: countDatasets }, options: chartOptions(false, false)
-    });
-    percentChart = new Chart($("percentChart"), {
-      type: "bar", data: { labels, datasets: percentDatasets }, options: chartOptions(true, true)
-    });
-  }
-
-  function renderTable(list) {
-    const tbody = $("dataTable");
-    if (!list.length) {
-      tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="bi bi-search fs-2 d-block mb-2"></i>Nenhum registro corresponde aos filtros selecionados.</div></td></tr>';
-      return;
     }
-    tbody.innerHTML = list.map(row => {
-      const total = FIELDS.reduce((sum, f) => sum + row[f], 0);
-      return `<tr>
-        <td class="school-cell">${escapeHtml(row.LOCAL)}</td>
-        <td>${escapeHtml(row.TURMA)}</td>
-        ${FIELDS.map((f, i) => `<td class="num">${fmt(row[f])}</td>`).join("")}
-        <td class="num fw-bold">${fmt(total)}</td>
-      </tr>`;
-    }).join("");
-  }
 
-  function render() {
-    if (!records.length) return;
-    const school = $("schoolFilter").value;
-    const turma = $("classFilter").value;
-    filteredRecords = records.filter(row =>
-      (!school || row.LOCAL === school) && (!turma || row.TURMA === turma)
-    );
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, c => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      })[c]);
+    }
 
-    const { totals, total } = aggregate(filteredRecords);
-    $("kpiTotal").textContent = fmt(total);
-    $("kpiBelow").textContent = fmt(totals[0]);
-    $("kpiBelowPct").textContent = pct(totals[0], total) + " do total";
-    $("kpiCritical").textContent = fmt(totals[1]);
-    $("kpiCriticalPct").textContent = pct(totals[1], total) + " do total";
-    $("kpiPositive").textContent = fmt(totals[2] + totals[3]);
-    $("kpiPositivePct").textContent = pct(totals[2] + totals[3], total) + " do total";
+    function normalizeRows(jsonRows) {
+      if (!jsonRows.length) throw new Error("A primeira aba da planilha está vazia.");
+      const mapped = jsonRows.map(raw => {
+        const obj = {};
+        Object.entries(raw).forEach(([key, value]) => obj[normalizeHeader(key)] = value);
+        return obj;
+      });
+      const required = ["LOCAL", "TURMA", ...FIELDS];
+      const headers = Object.keys(mapped[0]);
+      const missing = required.filter(field => !headers.includes(field));
+      if (missing.length) throw new Error("Colunas obrigatórias ausentes: " + missing.join(", "));
 
-    $("selectionCaption").textContent = `${school || "Todas as escolas"} · ${turma || "Todas as turmas"}`;
-    $("recordCount").textContent = `${filteredRecords.length} registro(s) · ${new Set(filteredRecords.map(r => r.LOCAL)).size} escola(s)`;
-    $("countChartSubtitle").textContent = school ? "Comparação entre turmas da escola selecionada" : "Comparação entre escolas";
-    $("percentChartSubtitle").textContent = turma ? "Composição percentual da turma selecionada · 100%" : school ? "Composição percentual por turma · 100%" : "Composição percentual por escola · 100%";
+      const normalized = mapped.map((r, index) => {
+        const item = { LOCAL: cleanText(r.LOCAL), TURMA: cleanText(r.TURMA) };
+        FIELDS.forEach(field => item[field] = parseNumber(r[field]));
+        if (!item.LOCAL || !item.TURMA) return null;
+        if (FIELDS.some(field => item[field] < 0))
+          throw new Error(`Valor negativo encontrado na linha ${index + 2}.`);
+        return item;
+      }).filter(Boolean);
 
-    buildCharts(groupData(filteredRecords, Boolean(school)));
-    renderTable(filteredRecords);
-    $("lastUpdate").textContent = "Dados atualizados em " + new Date().toLocaleString("pt-BR");
-  }
+      if (!normalized.length) throw new Error("Não foram encontrados registros válidos.");
+      return normalized;
+    }
 
-  async function loadWorkbookFile(file, showSuccess = true) {
-    $("loadingOverlay").classList.add("show");
-    try {
-      const buffer = await file.arrayBuffer();
-      const workbook = XLSX.read(buffer, { type: "array" });
-      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-      const json = XLSX.utils.sheet_to_json(firstSheet, { defval: "" });
-      records = normalizeRows(json);
-      currentFileName = file.name;
-      populateSchools();
+    function populateSchools() {
+      const schoolSelect = $("schoolFilter");
+      const previous = schoolSelect.value;
+      schoolSelect.innerHTML = '<option value="">Todas as escolas</option>';
+      [...new Set(records.map(r => r.LOCAL))]
+        .sort((a, b) => a.localeCompare(b, "pt-BR"))
+        .forEach(name => schoolSelect.add(new Option(name, name)));
+      if ([...schoolSelect.options].some(o => o.value === previous)) schoolSelect.value = previous;
+      populateClasses();
+    }
+
+    function populateClasses() {
+      const selectedSchool = $("schoolFilter").value;
+      const classSelect = $("classFilter");
+      const previous = classSelect.value;
+      classSelect.innerHTML = '<option value="">Todas as turmas</option>';
+      const classes = [...new Set(
+        records.filter(r => !selectedSchool || r.LOCAL === selectedSchool).map(r => r.TURMA)
+      )].sort((a, b) => a.localeCompare(b, "pt-BR"));
+      classes.forEach(name => classSelect.add(new Option(name, name)));
+      classSelect.disabled = !selectedSchool;
+      if (classes.includes(previous)) classSelect.value = previous;
+    }
+
+    function aggregate(list) {
+      const totals = FIELDS.map(field => list.reduce((sum, row) => sum + row[field], 0));
+      return { totals, total: totals.reduce((s, v) => s + v, 0) };
+    }
+
+    function groupData(list, schoolSelected) {
+      const groups = new Map();
+      list.forEach(row => {
+        const key = schoolSelected ? row.TURMA : row.LOCAL;
+        if (!groups.has(key)) groups.set(key, FIELDS.map(() => 0));
+        FIELDS.forEach((field, i) => groups.get(key)[i] += row[field]);
+      });
+      return [...groups.entries()].sort((a, b) => a[0].localeCompare(b[0], "pt-BR"));
+    }
+
+    function chartOptions({ horizontal = false, stacked = false, percent = false } = {}) {
+      const t = getChartTheme();
+      const valueAxis = {
+        stacked, beginAtZero: true, max: percent ? 100 : undefined,
+        grid: { color: t.grid, drawTicks: false },
+        ticks: {
+          color: t.text, padding: 6,
+          font: { size: chartFS(13), family: chartFontFamily() },
+          callback: v => percent ? v + "%" : fmt(v)
+        },
+        border: { display: false }
+      };
+      const categoryAxis = {
+        stacked,
+        grid: { display: false },
+        ticks: {
+          color: t.category, padding: 8,
+          font: { size: chartFS(13), family: chartFontFamily(), weight: "600" },
+          maxRotation: horizontal ? 0 : 35, minRotation: 0, autoSkip: false
+        },
+        border: { display: false }
+      };
+      return {
+        responsive: true,
+        maintainAspectRatio: false,
+        indexAxis: horizontal ? "y" : "x",
+        interaction: { mode: "index", intersect: false },
+        layout: { padding: { top: horizontal ? 4 : 22, right: 8, left: 4, bottom: 4 } },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: t.tooltipBg, padding: 12, cornerRadius: 9,
+            titleFont: { family: chartFontFamily(), size: chartFS(13), weight: "700" },
+            bodyFont: { family: chartFontFamily(), size: chartFS(12) },
+            callbacks: {
+              label: ctx => {
+                const v = ctx.parsed[horizontal ? "x" : "y"];
+                return `${ctx.dataset.label}: ${percent ? v.toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + "%" : fmt(v)}`;
+              }
+            }
+          }
+        },
+        scales: horizontal ? { x: valueAxis, y: categoryAxis } : { x: categoryAxis, y: valueAxis }
+      };
+    }
+
+    function buildCharts(groups) {
+      currentGroups = groups;
+      const labels = groups.map(([name]) => name);
+      const t = getChartTheme();
+
+      // Contagem (vertical agrupado)
+      const countDatasets = FIELDS.map((field, i) => ({
+        label: LABELS[i],
+        data: groups.map(([, values]) => values[i]),
+        backgroundColor: COLORS[i],
+        borderRadius: 6,
+        borderSkipped: false,
+        maxBarThickness: 46,
+        datalabels: {
+          anchor: "end", align: "end", offset: 4, clamp: true,
+          color: t.labelLight,
+          font: { size: chartFS(12), weight: "700", family: chartFontFamily() },
+          formatter: v => v > 0 ? fmt(v) : ""
+        }
+      }));
+
+      // Percentual (horizontal 100% empilhado)
+      const percentDatasets = FIELDS.map((field, i) => ({
+        label: LABELS[i],
+        data: groups.map(([, values]) => {
+          const total = values.reduce((a, b) => a + b, 0);
+          return total ? values[i] / total * 100 : 0;
+        }),
+        backgroundColor: COLORS[i],
+        borderRadius: 3,
+        borderSkipped: false,
+        maxBarThickness: 38,
+        datalabels: {
+          anchor: "center", align: "center",
+          color: DL_TEXT[i],
+          font: { size: chartFS(12), weight: "800", family: chartFontFamily() },
+          formatter: v => v >= 6 ? v.toFixed(1).replace(".", ",") + "%" : ""
+        }
+      }));
+
+      if (countChart) countChart.destroy();
+      if (percentChart) percentChart.destroy();
+
+      countChart = new Chart($("countChart"), {
+        type: "bar",
+        data: { labels, datasets: countDatasets },
+        options: chartOptions({ horizontal: false, stacked: false, percent: false })
+      });
+
+      percentChart = new Chart($("percentChart"), {
+        type: "bar",
+        data: { labels, datasets: percentDatasets },
+        options: chartOptions({ horizontal: true, stacked: true, percent: true })
+      });
+
+      // Altura dinâmica do gráfico horizontal
+      const wrap = $("percentChartWrap");
+      const rows = Math.max(1, labels.length);
+      wrap.style.height = Math.min(560, Math.max(300, rows * 58 + 80)) + "px";
+    }
+
+    function renderTable(list) {
+      const tbody = $("dataTable");
+      if (!list.length) {
+        tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="bi bi-search fs-2 d-block mb-2" aria-hidden="true"></i>Nenhum registro corresponde aos filtros selecionados.</div></td></tr>';
+        return;
+      }
+      tbody.innerHTML = list.map(row => {
+        const total = FIELDS.reduce((sum, f) => sum + row[f], 0);
+        return `<tr>
+          <td class="school-cell">${escapeHtml(row.LOCAL)}</td>
+          <td>${escapeHtml(row.TURMA)}</td>
+          ${FIELDS.map(f => `<td class="num">${fmt(row[f])}</td>`).join("")}
+          <td class="num fw-bold">${fmt(total)}</td>
+        </tr>`;
+      }).join("");
+    }
+
+    function render() {
+      if (!records.length) return;
+      const school = $("schoolFilter").value;
+      const turma = $("classFilter").value;
+      filteredRecords = records.filter(row =>
+        (!school || row.LOCAL === school) && (!turma || row.TURMA === turma)
+      );
+
+      const { totals, total } = aggregate(filteredRecords);
+      $("kpiTotal").textContent = fmt(total);
+      $("kpiBelow").textContent = fmt(totals[0]);
+      $("kpiBelowPct").textContent = pct(totals[0], total) + " do total";
+      $("kpiCritical").textContent = fmt(totals[1]);
+      $("kpiCriticalPct").textContent = pct(totals[1], total) + " do total";
+      $("kpiPositive").textContent = fmt(totals[2] + totals[3]);
+      $("kpiPositivePct").textContent = pct(totals[2] + totals[3], total) + " do total";
+
+      $("selectionCaption").textContent = `${school || "Todas as escolas"} · ${turma || "Todas as turmas"}`;
+      $("recordCount").textContent =
+        `${filteredRecords.length} registro(s) · ${new Set(filteredRecords.map(r => r.LOCAL)).size} escola(s)`;
+      $("countChartSubtitle").textContent =
+        school ? "Comparação entre turmas da escola selecionada" : "Comparação entre escolas";
+      $("percentChartSubtitle").textContent =
+        turma ? "Composição percentual da turma selecionada · 100%"
+          : school ? "Composição percentual por turma · 100%"
+          : "Composição percentual por escola · 100%";
+
+      buildCharts(groupData(filteredRecords, Boolean(school)));
+      renderTable(filteredRecords);
+      $("lastUpdate").textContent = "Dados atualizados em " + new Date().toLocaleString("pt-BR");
+    }
+
+    async function loadWorkbookFile(file) {
+      $("loadingOverlay").classList.add("show");
+      try {
+        const buffer = await file.arrayBuffer();
+        const workbook = XLSX.read(buffer, { type: "array" });
+        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json(firstSheet, { defval: "" });
+        records = normalizeRows(json);
+        currentFileName = file.name;
+        populateSchools();
+        render();
+        setStatus(
+          `Base carregada: ${currentFileName} · ${records.length} registros · ${new Set(records.map(r => r.LOCAL)).size} escolas.`,
+          "success"
+        );
+      } catch (error) {
+        setStatus("Não foi possível ler a planilha: " + error.message, "error");
+        console.error(error);
+      } finally {
+        $("loadingOverlay").classList.remove("show");
+      }
+    }
+
+    async function loadWorkbookFromSameFolder() {
+      try {
+        const response = await fetch(FILE_NAME, { cache: "no-store" });
+        if (!response.ok) throw new Error(`Arquivo não encontrado (HTTP ${response.status}).`);
+        const buffer = await response.arrayBuffer();
+        const workbook = XLSX.read(buffer, { type: "array" });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        records = normalizeRows(XLSX.utils.sheet_to_json(sheet, { defval: "" }));
+        currentFileName = FILE_NAME;
+        populateSchools();
+        render();
+        setStatus(
+          `Base carregada automaticamente: ${FILE_NAME} · ${records.length} registros · ${new Set(records.map(r => r.LOCAL)).size} escolas.`,
+          "success"
+        );
+      } catch (error) {
+        setStatus(
+          `Não foi possível carregar ${FILE_NAME} automaticamente. ${error.message} Use "Carregar XLSX" para selecionar o arquivo.`,
+          "error"
+        );
+        $("dataTable").innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="bi bi-file-earmark-excel fs-2 d-block mb-2" aria-hidden="true"></i>Coloque bd_ami.xlsx na mesma pasta do HTML ou carregue a planilha manualmente.</div></td></tr>';
+        $("recordCount").textContent = "Base não carregada";
+      }
+    }
+
+    /* ---- Tema (claro / escuro) ---- */
+    function applyTheme(theme) {
+      document.documentElement.setAttribute("data-theme", theme);
+      const pressed = theme === "dark";
+      $("themeToggle").setAttribute("aria-pressed", String(pressed));
+      $("themeToggle").setAttribute("aria-label", pressed ? "Ativar modo claro" : "Ativar modo escuro");
+      $("themeIcon").className = pressed ? "bi bi-sun-fill" : "bi bi-moon-stars-fill";
+      document.querySelector('meta[name="theme-color"]')
+        .setAttribute("content", pressed ? "#0d1420" : "#14233b");
+      localStorage.setItem("ami-theme", theme);
+      if (records.length) render(); // reconstrói gráficos com novas cores
+    }
+
+    /* ---- Dislexia ---- */
+    function applyDyslexia(on) {
+      document.body.classList.toggle("dyslexia", on);
+      $("dyslexiaToggle").setAttribute("aria-pressed", String(on));
+      $("dyslexiaToggle").setAttribute("aria-label", on ? "Desativar modo dislexia" : "Ativar modo dislexia");
+      localStorage.setItem("ami-dyslexia", on ? "1" : "0");
+      if (records.length) render();
+    }
+
+    /* ---- Escala tipográfica ---- */
+    const FS_STEPS = ["md", "lg", "xl"];
+    function applyFontSize(step) {
+      if (!FS_STEPS.includes(step)) step = "md";
+      document.documentElement.setAttribute("data-fs", step);
+      localStorage.setItem("ami-fs", step);
+      if (records.length) render();
+    }
+    function stepFont(dir) {
+      const cur = document.documentElement.getAttribute("data-fs") || "md";
+      const i = FS_STEPS.indexOf(cur);
+      const next = FS_STEPS[Math.max(0, Math.min(FS_STEPS.length - 1, i + dir))];
+      applyFontSize(next);
+    }
+
+    /* ---- Preferências iniciais ---- */
+    (function initPrefs() {
+      const savedTheme = localStorage.getItem("ami-theme");
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      applyTheme(savedTheme || (prefersDark ? "dark" : "light"));
+      applyDyslexia(localStorage.getItem("ami-dyslexia") === "1");
+      applyFontSize(localStorage.getItem("ami-fs") || "md");
+    })();
+
+    /* ---- Eventos ---- */
+    $("schoolFilter").addEventListener("change", () => { populateClasses(); render(); });
+    $("classFilter").addEventListener("change", render);
+    $("resetFilters").addEventListener("click", () => {
+      $("schoolFilter").value = "";
+      populateClasses();
       render();
-      setStatus(`Base carregada: ${currentFileName} · ${records.length} registros · ${new Set(records.map(r => r.LOCAL)).size} escolas.`, "success");
-    } catch (error) {
-      setStatus("Não foi possível ler a planilha: " + error.message, "error");
-      console.error(error);
-    } finally {
-      $("loadingOverlay").classList.remove("show");
-    }
-  }
+    });
+    $("xlsxInput").addEventListener("change", event => {
+      const file = event.target.files[0];
+      if (file) loadWorkbookFile(file);
+      event.target.value = "";
+    });
+    $("logoInput").addEventListener("change", event => {
+      const file = event.target.files[0];
+      if (!file) return;
+      const url = URL.createObjectURL(file);
+      $("logoPreview").innerHTML = `<img src="${url}" alt="Logotipo da instituição">`;
+    });
 
-  async function loadWorkbookFromSameFolder() {
-    try {
-      const response = await fetch(FILE_NAME, { cache: "no-store" });
-      if (!response.ok) throw new Error(`Arquivo não encontrado (HTTP ${response.status}).`);
-      const buffer = await response.arrayBuffer();
-      const workbook = XLSX.read(buffer, { type: "array" });
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      records = normalizeRows(XLSX.utils.sheet_to_json(sheet, { defval: "" }));
-      currentFileName = FILE_NAME;
-      populateSchools();
-      render();
-      setStatus(`Base carregada automaticamente: ${FILE_NAME} · ${records.length} registros · ${new Set(records.map(r => r.LOCAL)).size} escolas.`, "success");
-    } catch (error) {
-      setStatus(`Não foi possível carregar ${FILE_NAME} automaticamente. ${error.message} Use “Carregar XLSX” para selecionar o arquivo.`, "error");
-      $("dataTable").innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="bi bi-file-earmark-excel fs-2 d-block mb-2"></i>Coloque bd_ami.xlsx na mesma pasta do HTML ou carregue a planilha manualmente.</div></td></tr>';
-      $("recordCount").textContent = "Base não carregada";
-    }
-  }
+    $("themeToggle").addEventListener("click", () => {
+      applyTheme(getTheme() === "dark" ? "light" : "dark");
+    });
+    $("dyslexiaToggle").addEventListener("click", () => {
+      applyDyslexia(!document.body.classList.contains("dyslexia"));
+    });
+    $("fontPlus").addEventListener("click", () => stepFont(1));
+    $("fontMinus").addEventListener("click", () => stepFont(-1));
 
-  $("schoolFilter").addEventListener("change", () => { populateClasses(); render(); });
-  $("classFilter").addEventListener("change", render);
-  $("resetFilters").addEventListener("click", () => {
-    $("schoolFilter").value = "";
-    populateClasses();
-    render();
-  });
-  $("xlsxInput").addEventListener("change", event => {
-    const file = event.target.files[0];
-    if (file) loadWorkbookFile(file);
-    event.target.value = "";
-  });
+    document.querySelectorAll("[data-download]").forEach(button => {
+      button.addEventListener("click", () => {
+        const chart = button.dataset.download === "countChart" ? countChart : percentChart;
+        if (!chart) return;
+        const link = document.createElement("a");
+        link.href = chart.toBase64Image("image/png", 1);
+        link.download = button.dataset.download === "countChart"
+          ? "quantidade_por_categoria.png"
+          : "distribuicao_percentual_100.png";
+        link.click();
+      });
+    });
 
-  $("logoInput").addEventListener("change", event => {
-    const file = event.target.files[0];
-    if (!file) return;
-    const url = URL.createObjectURL(file);
-    $("logoPreview").innerHTML = `<img src="${url}" alt="Logotipo da instituição">`;
-  });
-
-  document.querySelectorAll("[data-download]").forEach(button => {
-    button.addEventListener("click", () => {
-      const chart = button.dataset.download === "countChart" ? countChart : percentChart;
-      if (!chart) return;
+    $("exportCsv").addEventListener("click", () => {
+      if (!filteredRecords.length) { setStatus("Não há registros para exportar.", "error"); return; }
+      const header = ["LOCAL", "TURMA", ...FIELDS, "TOTAL"];
+      const lines = [
+        header,
+        ...filteredRecords.map(r => [
+          r.LOCAL, r.TURMA,
+          ...FIELDS.map(f => r[f]),
+          FIELDS.reduce((a, f) => a + r[f], 0)
+        ])
+      ];
+      const csv = "\uFEFF" + lines.map(row =>
+        row.map(v => `"${String(v ?? "").replace(/"/g, '""')}"`).join(";")
+      ).join("\r\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
-      link.href = chart.toBase64Image("image/png", 1);
-      link.download = button.dataset.download === "countChart" ? "quantidade_por_categoria.png" : "distribuicao_percentual_100.png";
+      link.href = url;
+      link.download = "dados_ami_filtrados.csv";
       link.click();
+      URL.revokeObjectURL(url);
     });
-  });
 
-  $("exportCsv").addEventListener("click", () => {
-    if (!filteredRecords.length) { setStatus("Não há registros para exportar.", "error"); return; }
-    const header = ["LOCAL", "TURMA", ...FIELDS, "TOTAL"];
-    const lines = [header, ...filteredRecords.map(r => [...FIELDS.reduce((a,f) => a.concat(r[f]), []), FIELDS.reduce((a,f) => a+r[f],0)].length
-      ? [r.LOCAL, r.TURMA, ...FIELDS.map(f => r[f]), FIELDS.reduce((a,f) => a+r[f],0)]
-      : [])];
-    const csv = "\uFEFF" + lines.map(row => row.map(v => `"${String(v ?? "").replace(/"/g,'""')}"`).join(";")).join("\r\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url; link.download = "dados_ami_filtrados.csv"; link.click();
-    URL.revokeObjectURL(url);
-  });
+    // Ano dinâmico no rodapé
+    $("currentYear").textContent = new Date().getFullYear();
 
-  // Carregamento automático da planilha que estiver ao lado deste HTML.
-  loadWorkbookFromSameFolder();
-})();
-</script>
+    // Carregamento automático da planilha
+    loadWorkbookFromSameFolder();
+  })();
+  </script>
 </body>
 </html>
