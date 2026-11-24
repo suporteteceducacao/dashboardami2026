@@ -20,32 +20,18 @@
     html[data-fs="xl"] { font-size: 20px; }
 
     :root {
-      --navy: #14233b;
-      --navy-2: #1d3150;
-      --ink: #1a2433;
-      --muted: #5a6779;
-      --line: #e2e8f0;
-      --canvas: #f4f7fb;
-      --card: #ffffff;
-      --white: #fff;
-      --red: #d93b3b;
-      --yellow: #e0ab1f;
-      --light-green: #7fc79b;
-      --green: #0f5e3c;
+      --navy: #14233b; --navy-2: #1d3150;
+      --ink: #1a2433; --muted: #5a6779;
+      --line: #e2e8f0; --canvas: #f4f7fb; --card: #ffffff; --white: #fff;
+      --red: #d93b3b; --yellow: #e0ab1f; --light-green: #7fc79b; --green: #0f5e3c;
       --blue: #4264c6;
       --shadow: 0 8px 28px rgba(28, 48, 78, .07);
       --radius: 18px;
-      --radius-sm: 12px;
     }
     html[data-theme="dark"] {
-      --ink: #e5edf7;
-      --muted: #98a9c0;
-      --line: #26334a;
-      --canvas: #0d1420;
-      --card: #16202f;
-      --white: #16202f;
-      --navy: #0a1420;
-      --navy-2: #101d31;
+      --ink: #e5edf7; --muted: #98a9c0; --line: #26334a;
+      --canvas: #0d1420; --card: #16202f; --white: #16202f;
+      --navy: #0a1420; --navy-2: #101d31;
       --shadow: 0 8px 28px rgba(0, 0, 0, .35);
       color-scheme: dark;
     }
@@ -66,30 +52,22 @@
       *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
     }
 
-    /* Skip link */
     .skip-link {
       position: absolute; top: -100px; left: 10px; z-index: 999;
       background: var(--navy); color: #fff; padding: .75rem 1rem;
-      border-radius: .5rem; font-weight: 700; text-decoration: none;
-      font-size: .9rem;
+      border-radius: .5rem; font-weight: 700; text-decoration: none; font-size: .9rem;
     }
     .skip-link:focus { top: 10px; }
-
-    /* Foco visível */
-    :focus-visible {
-      outline: 3px solid var(--blue); outline-offset: 2px; border-radius: 4px;
-    }
+    :focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; border-radius: 4px; }
 
     .app-shell { min-height: 100vh; display: flex; }
 
-    /* Sidebar */
     .sidebar {
       width: 280px; min-height: 100vh;
       background: linear-gradient(180deg, var(--navy), #0a1420);
       color: #fff; padding: 1.5rem 1.1rem;
       position: fixed; inset: 0 auto 0 0; z-index: 20;
-      display: flex; flex-direction: column;
-      overflow-y: auto;
+      display: flex; flex-direction: column; overflow-y: auto;
     }
     .brand { display:flex; align-items:center; gap:.8rem; padding: .2rem .3rem 1.4rem;
       border-bottom:1px solid rgba(255,255,255,.12); }
@@ -98,12 +76,8 @@
       box-shadow: 0 4px 14px rgba(110,141,241,.35); }
     .brand-name { font-size: 1.15rem; font-weight: 800; letter-spacing:.3px; }
     .brand-sub { font-size: .7rem; color:#aebbd0; letter-spacing:1.2px; text-transform:uppercase; margin-top:.15rem; }
-    .logo-slot { margin: 1.2rem .2rem 1.4rem; height: 6.5rem; border: 1px dashed rgba(255,255,255,.3);
-      border-radius: .9rem; display:grid; place-items:center; color:#aebbd0; font-size:.75rem;
-      overflow:hidden; background: rgba(255,255,255,.04); text-align: center; }
-    .logo-slot img { max-width: 90%; max-height: 90%; object-fit: contain; }
     .side-label { color:#8fa1bb; font-size:.72rem; font-weight: 800; letter-spacing:1.3px;
-      text-transform: uppercase; margin: 0 .3rem .8rem; }
+      text-transform: uppercase; margin: 1.4rem .3rem .8rem; }
     .filter-label { font-size:.82rem; color:#dbe4f1; font-weight: 600; margin:0 0 .45rem .1rem; display: block; }
     .sidebar .form-select {
       background-color: #203450; border: 1px solid #354b68; color: #fff;
@@ -117,11 +91,7 @@
       color: #bdc9da; font-size: .78rem; line-height: 1.55; }
     .sidebar-bottom { margin-top: auto; color: #8fa1bb; font-size: .72rem; padding: 1.1rem .2rem 0; }
 
-    /* Main */
-    .main {
-      margin-left: 280px; padding: 2rem 2.2rem 1.4rem;
-      width: calc(100% - 280px); max-width: 100%;
-    }
+    .main { margin-left: 280px; padding: 2rem 2.2rem 1.4rem; width: calc(100% - 280px); }
     .topline { display: flex; align-items: flex-start; justify-content: space-between;
       gap: 1rem; flex-wrap: wrap; margin-bottom: 1.6rem; }
     .eyebrow { font-size: .72rem; color: var(--blue); letter-spacing: 1.3px;
@@ -144,33 +114,30 @@
     .btn-icon:hover { background: rgba(66,100,198,.1); color: var(--blue); }
     .btn-icon[aria-pressed="true"] { background: var(--blue); color: #fff; }
 
-    .btn-upload {
-      background: var(--navy); color: #fff; border: 0; border-radius: .7rem;
-      padding: .7rem 1rem; font-size: .85rem; font-weight: 700;
-      box-shadow: 0 5px 14px rgba(20,35,59,.18);
-      cursor: pointer; display: inline-flex; align-items: center; gap: .35rem;
-    }
-    .btn-upload:hover { background: #263e61; }
     .btn-soft {
       border: 1px solid var(--line); background: var(--card); color: var(--ink);
       border-radius: .7rem; padding: .65rem .9rem; font-size: .85rem; font-weight: 700;
       cursor: pointer; display: inline-flex; align-items: center; gap: .35rem;
+      transition: background .15s;
     }
     .btn-soft:hover { background: var(--canvas); }
+    .btn-soft.primary {
+      background: var(--navy); color: #fff; border-color: var(--navy);
+      box-shadow: 0 5px 14px rgba(20,35,59,.18);
+    }
+    .btn-soft.primary:hover { background: #263e61; }
 
     .context-bar {
       background: #eaf0ff; border: 1px solid #dce6ff; color: #435a94;
       padding: .75rem 1rem; border-radius: .75rem; font-size: .82rem;
       margin-bottom: 1.2rem; display: flex; align-items: center; gap: .55rem;
     }
-    html[data-theme="dark"] .context-bar {
-      background: #1c2a44; border-color: #2b3d5c; color: #b7c7e4;
-    }
+    html[data-theme="dark"] .context-bar { background: #1c2a44; border-color: #2b3d5c; color: #b7c7e4; }
 
     .section-heading { font-size: 1rem; font-weight: 800; margin: 0; }
     .section-caption { color: var(--muted); font-size: .78rem; margin-top: .2rem; }
 
-    /* KPIs */
+    /* ===== KPIs ===== */
     .kpi-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr));
       gap: .9rem; margin: 1rem 0 1.4rem; }
     .kpi-card, .chart-card, .table-card {
@@ -178,22 +145,32 @@
       border-radius: var(--radius); box-shadow: var(--shadow);
       transition: background-color .25s ease, border-color .25s ease;
     }
-    .kpi-card { padding: 1.15rem 1.2rem; position: relative; overflow: hidden; }
+    .kpi-card { padding: 1.15rem 1.2rem 1.25rem; position: relative; overflow: hidden;
+      display: flex; flex-direction: column; }
     .kpi-top { display:flex; justify-content:space-between; align-items:center; gap:.5rem; }
     .kpi-label { color: var(--muted); font-size: .82rem; font-weight: 600; }
     .kpi-icon { width: 2.5rem; height: 2.5rem; display:grid; place-items:center;
       border-radius: .75rem; font-size: 1.15rem; }
-    .kpi-value { font-size: 2rem; font-weight: 800; letter-spacing: -1px;
-      margin-top: .9rem; line-height: 1; }
+    .kpi-value { font-size: 2.15rem; font-weight: 800; letter-spacing: -1px;
+      margin-top: 1rem; line-height: 1; }
+    /* Percentual destacado */
+    .kpi-pct {
+      display: flex; align-items: baseline; gap: .4rem;
+      font-size: 1.55rem; font-weight: 800; letter-spacing: -.5px;
+      margin-top: .55rem; line-height: 1;
+    }
+    .kpi-pct span {
+      font-size: .82rem; font-weight: 600; color: var(--muted);
+      letter-spacing: 0; text-transform: uppercase;
+    }
     .kpi-foot { color: var(--muted); font-size: .78rem; margin-top: .5rem; }
     .kpi-card::after {
       content:""; position:absolute; width:4.2rem; height:4.2rem; border-radius:50%;
       right:-1.8rem; bottom:-2.2rem; background: var(--tint);
     }
 
-    /* Charts */
-    .charts-grid { display: grid; grid-template-columns: 1fr 1fr;
-      gap: 1rem; margin-bottom: 1.4rem; }
+    /* ===== Charts ===== */
+    .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.4rem; }
     .chart-card { padding: 1.2rem 1.2rem .9rem; min-width: 0; }
     .chart-header { display:flex; justify-content:space-between; align-items:flex-start; gap:.8rem; }
     .chart-title { font-size: 1rem; font-weight: 800; }
@@ -209,7 +186,7 @@
     .chart-wrap { position: relative; height: 320px; }
     #percentChartWrap { min-height: 340px; }
 
-    /* Table */
+    /* ===== Table ===== */
     .table-card { padding: 1.2rem; }
     .table-responsive { margin-top: .9rem; }
     .table { --bs-table-bg: transparent; margin-bottom: 0; font-size: .88rem; color: var(--ink); }
@@ -219,18 +196,15 @@
       border-bottom: 1px solid var(--line); padding: .8rem .6rem;
       white-space: nowrap; background: transparent;
     }
-    .table tbody td {
-      padding: .85rem .6rem; border-color: var(--line);
-      color: var(--ink); vertical-align: middle;
-    }
+    .table tbody td { padding: .85rem .6rem; border-color: var(--line);
+      color: var(--ink); vertical-align: middle; }
     .table tbody tr:last-child td { border-bottom: 0; }
     .table tbody tr:hover { background: rgba(66,100,198,.05); }
     .table .school-cell { font-weight: 700; min-width: 12rem; white-space: normal; }
     .table .num { font-variant-numeric: tabular-nums; text-align: right; }
-    .empty-state { padding: 3.5rem 1rem; text-align:center;
-      color: var(--muted); font-size: .95rem; }
+    .empty-state { padding: 3.5rem 1rem; text-align:center; color: var(--muted); font-size: .95rem; }
 
-    /* Footer */
+    /* ===== Footer ===== */
     .footer {
       display: flex; justify-content: space-between; gap: 1rem;
       flex-wrap: wrap; padding: 1.5rem .2rem .2rem;
@@ -243,8 +217,7 @@
     #loadingOverlay {
       display: none; position: fixed; inset: 0;
       background: rgba(244,247,251,.82); z-index: 50;
-      align-items: center; justify-content: center;
-      backdrop-filter: blur(3px);
+      align-items: center; justify-content: center; backdrop-filter: blur(3px);
     }
     html[data-theme="dark"] #loadingOverlay { background: rgba(13,20,32,.82); }
     #loadingOverlay.show { display:flex; }
@@ -252,7 +225,6 @@
       border-radius: 1rem; box-shadow: var(--shadow);
       font-size: .95rem; font-weight: 700; color: var(--ink); }
 
-    /* Responsivo */
     @media (max-width: 1200px) {
       .sidebar { width: 250px; }
       .main { margin-left: 250px; width: calc(100% - 250px); padding: 1.6rem 1.4rem 1rem; }
@@ -263,25 +235,23 @@
       .app-shell { flex-direction: column; }
       .sidebar { position: relative; width: 100%; min-height: 0; padding: 1rem; }
       .brand { padding-bottom: .8rem; }
-      .logo-slot { display: none; }
       .sidebar-bottom { display: none; }
       .sidebar .filter-row { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
       .filter-block { margin: 0; }
       .side-note { margin-top: .8rem; }
       .main { margin: 0; width: 100%; padding: 1.2rem .9rem; }
       h1 { font-size: 1.35rem; }
-      .topline { gap: .7rem; }
-      .top-actions { gap: .4rem; }
       .kpi-grid { gap: .6rem; }
-      .kpi-card { padding: .85rem; }
-      .kpi-value { font-size: 1.6rem; margin-top: .65rem; }
+      .kpi-card { padding: .9rem; }
+      .kpi-value { font-size: 1.7rem; margin-top: .7rem; }
+      .kpi-pct { font-size: 1.25rem; }
       .chart-card, .table-card { padding: 1rem; }
       .chart-wrap { height: 280px; }
     }
     @media (max-width: 420px) {
       .sidebar .filter-row { grid-template-columns: 1fr; }
       .a11y-group { width: 100%; justify-content: space-between; }
-      .top-actions > label { flex: 1; justify-content: center; }
+      .top-actions > button { flex: 1; justify-content: center; }
     }
   </style>
 </head>
@@ -296,10 +266,6 @@
           <div class="brand-name">AMI <span style="color:#91aaff">DASHBOARD</span></div>
           <div class="brand-sub">Monitoramento educacional</div>
         </div>
-      </div>
-
-      <div class="logo-slot" id="logoPreview" aria-label="Espaço para logotipo">
-        <div><i class="bi bi-image" style="font-size:1.4rem"></i><div class="mt-1">ESPAÇO PARA LOGOTIPO</div></div>
       </div>
 
       <div class="side-label"><i class="bi bi-sliders me-1"></i> Filtros de análise</div>
@@ -331,10 +297,7 @@
             <button class="btn-icon" id="dyslexiaToggle" aria-label="Ativar modo dislexia" aria-pressed="false" title="Modo dislexia"><i class="bi bi-book" aria-hidden="true"></i></button>
             <button class="btn-icon" id="themeToggle" aria-label="Ativar modo escuro" aria-pressed="false" title="Alternar tema"><i class="bi bi-moon-stars-fill" id="themeIcon" aria-hidden="true"></i></button>
           </div>
-          <label class="btn-upload mb-0" for="xlsxInput" style="cursor:pointer"><i class="bi bi-file-earmark-arrow-up me-1" aria-hidden="true"></i> Carregar XLSX</label>
-          <input type="file" id="xlsxInput" accept=".xlsx,.xls" hidden>
-          <label class="btn-soft mb-0" for="logoInput" style="cursor:pointer"><i class="bi bi-image me-1" aria-hidden="true"></i> Logotipo</label>
-          <input type="file" id="logoInput" accept="image/*" hidden>
+          <button class="btn-soft primary" id="reloadBtn"><i class="bi bi-arrow-clockwise me-1" aria-hidden="true"></i> Recarregar</button>
           <button class="btn-soft" id="resetFilters"><i class="bi bi-arrow-counterclockwise me-1" aria-hidden="true"></i> Limpar</button>
         </div>
       </header>
@@ -359,31 +322,34 @@
             <div class="kpi-icon" style="background:#eaf0ff;color:#4264c6" aria-hidden="true"><i class="bi bi-people-fill"></i></div>
           </div>
           <div class="kpi-value" id="kpiTotal">—</div>
-          <div class="kpi-foot">Estudantes contabilizados no recorte</div>
+          <div class="kpi-pct" id="kpiSchools" style="color:#4264c6">—<span>escolas</span></div>
         </article>
+
         <article class="kpi-card" style="--tint:#ffefee" aria-label="Estudantes abaixo do crítico">
           <div class="kpi-top">
             <div class="kpi-label">Abaixo do crítico</div>
             <div class="kpi-icon" style="background:#ffefee;color:var(--red)" aria-hidden="true"><i class="bi bi-graph-down-arrow"></i></div>
           </div>
           <div class="kpi-value" id="kpiBelow" style="color:var(--red)">—</div>
-          <div class="kpi-foot" id="kpiBelowPct">— do total</div>
+          <div class="kpi-pct" id="kpiBelowPct" style="color:var(--red)">—<span>do total</span></div>
         </article>
+
         <article class="kpi-card" style="--tint:#fff7e0" aria-label="Estudantes em nível crítico">
           <div class="kpi-top">
             <div class="kpi-label">Nível crítico</div>
             <div class="kpi-icon" style="background:#fff7e0;color:#9a7608" aria-hidden="true"><i class="bi bi-exclamation-triangle-fill"></i></div>
           </div>
           <div class="kpi-value" id="kpiCritical" style="color:#9a7608">—</div>
-          <div class="kpi-foot" id="kpiCriticalPct">— do total</div>
+          <div class="kpi-pct" id="kpiCriticalPct" style="color:#9a7608">—<span>do total</span></div>
         </article>
+
         <article class="kpi-card" style="--tint:#e8f6ee" aria-label="Estudantes em nível intermediário e desejável">
           <div class="kpi-top">
             <div class="kpi-label">Intermediário + desejável</div>
             <div class="kpi-icon" style="background:#e8f6ee;color:var(--green)" aria-hidden="true"><i class="bi bi-check2-circle"></i></div>
           </div>
           <div class="kpi-value" id="kpiPositive" style="color:var(--green)">—</div>
-          <div class="kpi-foot" id="kpiPositivePct">— do total</div>
+          <div class="kpi-pct" id="kpiPositivePct" style="color:var(--green)">—<span>do total</span></div>
         </article>
       </section>
 
@@ -469,20 +435,31 @@
     <div class="loading-box"><span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span> Processando planilha...</div>
   </div>
 
-  <!-- VLibras (Libras) -->
   <div vw class="enabled">
     <div vw-access-button class="active"></div>
-    <div vw-plugin-wrapper>
-      <div class="vw-plugin-top-wrapper"></div>
-    </div>
+    <div vw-plugin-wrapper><div class="vw-plugin-top-wrapper"></div></div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+
   <script>
-    new window.VLibras.Widget('https://vlibras.gov.br/app');
+    /* Registro explícito do plugin de rótulos (corrige "labels não aparecem") */
+    (function registerDatalabels() {
+      try {
+        if (window.Chart && window.ChartDataLabels) {
+          window.Chart.register(window.ChartDataLabels);
+          console.log('[AMI] chartjs-plugin-datalabels registrado.');
+        } else {
+          console.warn('[AMI] ChartDataLabels não carregado.');
+        }
+      } catch (err) {
+        console.error('[AMI] Falha ao registrar datalabels:', err);
+      }
+    })();
+    if (window.VLibras) new window.VLibras.Widget('https://vlibras.gov.br/app');
   </script>
 
   <script>
@@ -491,15 +468,12 @@
 
     const FILE_NAME = "bd_ami.xlsx";
     const COLORS = ["#d93b3b", "#e0ab1f", "#7fc79b", "#0f5e3c"];
-    const DL_TEXT = ["#ffffff", "#2a2a2a", "#0a2e1e", "#ffffff"]; // contraste por segmento
+    const DL_TEXT = ["#ffffff", "#2a2a2a", "#0a2e1e", "#ffffff"];
     const LABELS = ["Abaixo do crítico", "Crítico", "Intermediário", "Desejável"];
     const FIELDS = ["ABAIXO_CRITICO", "CRITICO", "INTERMEDIARIO", "DESEJAVEL"];
 
-    let records = [];
-    let filteredRecords = [];
-    let currentGroups = null;
-    let countChart = null;
-    let percentChart = null;
+    let records = [], filteredRecords = [];
+    let countChart = null, percentChart = null;
     let currentFileName = FILE_NAME;
 
     const $ = id => document.getElementById(id);
@@ -511,17 +485,16 @@
     const normalizeHeader = s => String(s ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "")
       .trim().toUpperCase().replace(/\s+/g, "_").replace(/%/g, "");
 
-    // Compatível com escala tipográfica (rem base)
-    const rootFS = () => parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
-    const chartFS = basePx => Math.max(11, Math.round(basePx * rootFS() / 16));
+    const rootFS = () => {
+      const v = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      return Number.isFinite(v) && v > 0 ? v : 16;
+    };
+    const chartFS = basePx => Math.max(12, Math.round(basePx * rootFS() / 16));
     const chartFontFamily = () => document.body.classList.contains("dyslexia")
       ? "'Open-Dyslexic', 'Atkinson Hyperlegible', sans-serif"
       : "'DM Sans', sans-serif";
 
-    function getTheme() {
-      return document.documentElement.getAttribute("data-theme") || "light";
-    }
-
+    const getTheme = () => document.documentElement.getAttribute("data-theme") || "light";
     function getChartTheme() {
       const dark = getTheme() === "dark";
       return {
@@ -545,21 +518,21 @@
     function setStatus(message, type = "info") {
       const el = $("dataStatus");
       const icon = type === "success" ? "bi-check-circle-fill"
-        : type === "error" ? "bi-exclamation-circle-fill"
-        : "bi-info-circle";
+        : type === "error" ? "bi-exclamation-circle-fill" : "bi-info-circle";
       el.innerHTML = `<i class="bi ${icon}" aria-hidden="true"></i><span>${escapeHtml(message)}</span>`;
+      const dark = getTheme() === "dark";
       if (type === "error") {
-        el.style.background = getTheme() === "dark" ? "#3a1e1e" : "#fff0ef";
-        el.style.borderColor = getTheme() === "dark" ? "#5a2b2b" : "#f4d4d1";
-        el.style.color = getTheme() === "dark" ? "#ffb4ae" : "#a83b35";
+        el.style.background = dark ? "#3a1e1e" : "#fff0ef";
+        el.style.borderColor = dark ? "#5a2b2b" : "#f4d4d1";
+        el.style.color = dark ? "#ffb4ae" : "#a83b35";
       } else if (type === "success") {
-        el.style.background = getTheme() === "dark" ? "#163525" : "#eaf6ef";
-        el.style.borderColor = getTheme() === "dark" ? "#1f4b32" : "#d6eadc";
-        el.style.color = getTheme() === "dark" ? "#8fdcae" : "#246c45";
+        el.style.background = dark ? "#163525" : "#eaf6ef";
+        el.style.borderColor = dark ? "#1f4b32" : "#d6eadc";
+        el.style.color = dark ? "#8fdcae" : "#246c45";
       } else {
-        el.style.background = getTheme() === "dark" ? "#1c2a44" : "#eaf0ff";
-        el.style.borderColor = getTheme() === "dark" ? "#2b3d5c" : "#dce6ff";
-        el.style.color = getTheme() === "dark" ? "#b7c7e4" : "#4b619c";
+        el.style.background = dark ? "#1c2a44" : "#eaf0ff";
+        el.style.borderColor = dark ? "#2b3d5c" : "#dce6ff";
+        el.style.color = dark ? "#b7c7e4" : "#4b619c";
       }
     }
 
@@ -651,7 +624,7 @@
         ticks: {
           color: t.category, padding: 8,
           font: { size: chartFS(13), family: chartFontFamily(), weight: "600" },
-          maxRotation: horizontal ? 0 : 35, minRotation: 0, autoSkip: false
+          maxRotation: horizontal ? 0 : 30, minRotation: 0, autoSkip: false
         },
         border: { display: false }
       };
@@ -660,12 +633,13 @@
         maintainAspectRatio: false,
         indexAxis: horizontal ? "y" : "x",
         interaction: { mode: "index", intersect: false },
-        layout: { padding: { top: horizontal ? 4 : 22, right: 8, left: 4, bottom: 4 } },
+        layout: { padding: { top: horizontal ? 8 : 30, right: 16, left: 8, bottom: 4 } },
         plugins: {
           legend: { display: false },
+          datalabels: { display: true },
           tooltip: {
             backgroundColor: t.tooltipBg, padding: 12, cornerRadius: 9,
-            titleFont: { family: chartFontFamily(), size: chartFS(13), weight: "700" },
+            titleFont: { family: chartFontFamily(), size: chartFS(13), weight: 700 },
             bodyFont: { family: chartFontFamily(), size: chartFS(12) },
             callbacks: {
               label: ctx => {
@@ -680,27 +654,30 @@
     }
 
     function buildCharts(groups) {
-      currentGroups = groups;
       const labels = groups.map(([name]) => name);
       const t = getChartTheme();
 
-      // Contagem (vertical agrupado)
+      // ===== Gráfico 1: Contagem (vertical agrupado) com rótulos no topo =====
       const countDatasets = FIELDS.map((field, i) => ({
         label: LABELS[i],
         data: groups.map(([, values]) => values[i]),
         backgroundColor: COLORS[i],
         borderRadius: 6,
         borderSkipped: false,
-        maxBarThickness: 46,
+        maxBarThickness: 52,
         datalabels: {
-          anchor: "end", align: "end", offset: 4, clamp: true,
+          display: true,
+          anchor: "end",
+          align: "top",
+          offset: 6,
+          clamp: true,
           color: t.labelLight,
-          font: { size: chartFS(12), weight: "700", family: chartFontFamily() },
-          formatter: v => v > 0 ? fmt(v) : ""
+          font: { size: chartFS(14), weight: 700, family: chartFontFamily() },
+          formatter: v => (v != null && v > 0) ? fmt(v) : ""
         }
       }));
 
-      // Percentual (horizontal 100% empilhado)
+      // ===== Gráfico 2: Percentual horizontal 100% empilhado, rótulos dentro =====
       const percentDatasets = FIELDS.map((field, i) => ({
         label: LABELS[i],
         data: groups.map(([, values]) => {
@@ -710,17 +687,21 @@
         backgroundColor: COLORS[i],
         borderRadius: 3,
         borderSkipped: false,
-        maxBarThickness: 38,
+        maxBarThickness: 42,
         datalabels: {
-          anchor: "center", align: "center",
+          display: true,
+          anchor: "center",
+          align: "center",
           color: DL_TEXT[i],
-          font: { size: chartFS(12), weight: "800", family: chartFontFamily() },
-          formatter: v => v >= 6 ? v.toFixed(1).replace(".", ",") + "%" : ""
+          font: { size: chartFS(13), weight: 800, family: chartFontFamily() },
+          formatter: v => (v != null && v >= 5)
+            ? v.toFixed(1).replace(".", ",") + "%"
+            : ""
         }
       }));
 
-      if (countChart) countChart.destroy();
-      if (percentChart) percentChart.destroy();
+      if (countChart) { countChart.destroy(); countChart = null; }
+      if (percentChart) { percentChart.destroy(); percentChart = null; }
 
       countChart = new Chart($("countChart"), {
         type: "bar",
@@ -734,10 +715,9 @@
         options: chartOptions({ horizontal: true, stacked: true, percent: true })
       });
 
-      // Altura dinâmica do gráfico horizontal
       const wrap = $("percentChartWrap");
       const rows = Math.max(1, labels.length);
-      wrap.style.height = Math.min(560, Math.max(300, rows * 58 + 80)) + "px";
+      wrap.style.height = Math.min(580, Math.max(300, rows * 62 + 90)) + "px";
     }
 
     function renderTable(list) {
@@ -766,17 +746,22 @@
       );
 
       const { totals, total } = aggregate(filteredRecords);
+      const schoolCount = new Set(filteredRecords.map(r => r.LOCAL)).size;
+
       $("kpiTotal").textContent = fmt(total);
+      $("kpiSchools").innerHTML = `${schoolCount}<span>${schoolCount === 1 ? "escola" : "escolas"}</span>`;
+
       $("kpiBelow").textContent = fmt(totals[0]);
-      $("kpiBelowPct").textContent = pct(totals[0], total) + " do total";
+      $("kpiBelowPct").innerHTML = `${pct(totals[0], total)}<span>do total</span>`;
+
       $("kpiCritical").textContent = fmt(totals[1]);
-      $("kpiCriticalPct").textContent = pct(totals[1], total) + " do total";
+      $("kpiCriticalPct").innerHTML = `${pct(totals[1], total)}<span>do total</span>`;
+
       $("kpiPositive").textContent = fmt(totals[2] + totals[3]);
-      $("kpiPositivePct").textContent = pct(totals[2] + totals[3], total) + " do total";
+      $("kpiPositivePct").innerHTML = `${pct(totals[2] + totals[3], total)}<span>do total</span>`;
 
       $("selectionCaption").textContent = `${school || "Todas as escolas"} · ${turma || "Todas as turmas"}`;
-      $("recordCount").textContent =
-        `${filteredRecords.length} registro(s) · ${new Set(filteredRecords.map(r => r.LOCAL)).size} escola(s)`;
+      $("recordCount").textContent = `${filteredRecords.length} registro(s) · ${schoolCount} escola(s)`;
       $("countChartSubtitle").textContent =
         school ? "Comparação entre turmas da escola selecionada" : "Comparação entre escolas";
       $("percentChartSubtitle").textContent =
@@ -789,30 +774,8 @@
       $("lastUpdate").textContent = "Dados atualizados em " + new Date().toLocaleString("pt-BR");
     }
 
-    async function loadWorkbookFile(file) {
-      $("loadingOverlay").classList.add("show");
-      try {
-        const buffer = await file.arrayBuffer();
-        const workbook = XLSX.read(buffer, { type: "array" });
-        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-        const json = XLSX.utils.sheet_to_json(firstSheet, { defval: "" });
-        records = normalizeRows(json);
-        currentFileName = file.name;
-        populateSchools();
-        render();
-        setStatus(
-          `Base carregada: ${currentFileName} · ${records.length} registros · ${new Set(records.map(r => r.LOCAL)).size} escolas.`,
-          "success"
-        );
-      } catch (error) {
-        setStatus("Não foi possível ler a planilha: " + error.message, "error");
-        console.error(error);
-      } finally {
-        $("loadingOverlay").classList.remove("show");
-      }
-    }
-
     async function loadWorkbookFromSameFolder() {
+      $("loadingOverlay").classList.add("show");
       try {
         const response = await fetch(FILE_NAME, { cache: "no-store" });
         if (!response.ok) throw new Error(`Arquivo não encontrado (HTTP ${response.status}).`);
@@ -824,20 +787,21 @@
         populateSchools();
         render();
         setStatus(
-          `Base carregada automaticamente: ${FILE_NAME} · ${records.length} registros · ${new Set(records.map(r => r.LOCAL)).size} escolas.`,
+          `Base carregada: ${currentFileName} · ${records.length} registros · ${new Set(records.map(r => r.LOCAL)).size} escolas.`,
           "success"
         );
       } catch (error) {
         setStatus(
-          `Não foi possível carregar ${FILE_NAME} automaticamente. ${error.message} Use "Carregar XLSX" para selecionar o arquivo.`,
+          `Não foi possível carregar ${FILE_NAME}. ${error.message} Verifique se o arquivo está na mesma pasta do HTML e recarregue a página.`,
           "error"
         );
-        $("dataTable").innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="bi bi-file-earmark-excel fs-2 d-block mb-2" aria-hidden="true"></i>Coloque bd_ami.xlsx na mesma pasta do HTML ou carregue a planilha manualmente.</div></td></tr>';
+        $("dataTable").innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="bi bi-file-earmark-excel fs-2 d-block mb-2" aria-hidden="true"></i>Coloque <strong>bd_ami.xlsx</strong> na mesma pasta do HTML e clique em "Recarregar".</div></td></tr>';
         $("recordCount").textContent = "Base não carregada";
+      } finally {
+        $("loadingOverlay").classList.remove("show");
       }
     }
 
-    /* ---- Tema (claro / escuro) ---- */
     function applyTheme(theme) {
       document.documentElement.setAttribute("data-theme", theme);
       const pressed = theme === "dark";
@@ -847,10 +811,9 @@
       document.querySelector('meta[name="theme-color"]')
         .setAttribute("content", pressed ? "#0d1420" : "#14233b");
       localStorage.setItem("ami-theme", theme);
-      if (records.length) render(); // reconstrói gráficos com novas cores
+      if (records.length) render();
     }
 
-    /* ---- Dislexia ---- */
     function applyDyslexia(on) {
       document.body.classList.toggle("dyslexia", on);
       $("dyslexiaToggle").setAttribute("aria-pressed", String(on));
@@ -859,7 +822,6 @@
       if (records.length) render();
     }
 
-    /* ---- Escala tipográfica ---- */
     const FS_STEPS = ["md", "lg", "xl"];
     function applyFontSize(step) {
       if (!FS_STEPS.includes(step)) step = "md";
@@ -870,11 +832,9 @@
     function stepFont(dir) {
       const cur = document.documentElement.getAttribute("data-fs") || "md";
       const i = FS_STEPS.indexOf(cur);
-      const next = FS_STEPS[Math.max(0, Math.min(FS_STEPS.length - 1, i + dir))];
-      applyFontSize(next);
+      applyFontSize(FS_STEPS[Math.max(0, Math.min(FS_STEPS.length - 1, i + dir))]);
     }
 
-    /* ---- Preferências iniciais ---- */
     (function initPrefs() {
       const savedTheme = localStorage.getItem("ami-theme");
       const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -883,7 +843,6 @@
       applyFontSize(localStorage.getItem("ami-fs") || "md");
     })();
 
-    /* ---- Eventos ---- */
     $("schoolFilter").addEventListener("change", () => { populateClasses(); render(); });
     $("classFilter").addEventListener("change", render);
     $("resetFilters").addEventListener("click", () => {
@@ -891,17 +850,7 @@
       populateClasses();
       render();
     });
-    $("xlsxInput").addEventListener("change", event => {
-      const file = event.target.files[0];
-      if (file) loadWorkbookFile(file);
-      event.target.value = "";
-    });
-    $("logoInput").addEventListener("change", event => {
-      const file = event.target.files[0];
-      if (!file) return;
-      const url = URL.createObjectURL(file);
-      $("logoPreview").innerHTML = `<img src="${url}" alt="Logotipo da instituição">`;
-    });
+    $("reloadBtn").addEventListener("click", loadWorkbookFromSameFolder);
 
     $("themeToggle").addEventListener("click", () => {
       applyTheme(getTheme() === "dark" ? "light" : "dark");
@@ -948,10 +897,7 @@
       URL.revokeObjectURL(url);
     });
 
-    // Ano dinâmico no rodapé
     $("currentYear").textContent = new Date().getFullYear();
-
-    // Carregamento automático da planilha
     loadWorkbookFromSameFolder();
   })();
   </script>
