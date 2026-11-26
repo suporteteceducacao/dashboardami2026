@@ -41,6 +41,7 @@
       margin: 0; background: var(--canvas); color: var(--ink);
       font-family: "DM Sans", sans-serif; font-size: 1rem; line-height: 1.5;
       transition: background-color .25s ease, color .25s ease;
+      position: relative;
     }
     body.dyslexia {
       font-family: 'Open-Dyslexic', 'OpenDyslexic', 'Atkinson Hyperlegible', 'DM Sans', sans-serif !important;
@@ -347,6 +348,22 @@
       background: rgba(0,0,0,.45);
       opacity: 0; pointer-events: none;
       transition: opacity .28s ease;
+    }
+
+    /* Container temporário do PDF — fixed para sempre estar no viewport */
+    #pdfReportHost {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      overflow: hidden !important;
+      z-index: 45 !important;
+      background: #ffffff !important;
+      pointer-events: none !important;
+    }
+    #pdfReportHost > #pdfReport {
+      background: #ffffff;
     }
 
     @media (min-width: 761px) {
@@ -666,7 +683,7 @@
        CONSTANTES
        ============================================================ */
     const FILE_NAME  = "bd_ami.xlsx";
-    const LOGIN_FILE = "login.xlsx";
+    const LOGIN_FILE = "senhas.xlsx";
     const MASTER_USER = "admin";
     const MASTER_PASS = "@admin";
     const COLORS = ["#d93b3b", "#e0ab1f", "#7fc79b", "#0f5e3c"];
@@ -1378,6 +1395,7 @@
         if (!chart) return "";
         if (!chart.data || !chart.data.datasets || chart.data.datasets.length === 0) return "";
         if (!chart.data.labels || chart.data.labels.length === 0) return "";
+        chart.update("none");
         const url = chart.toBase64Image("image/png", 1);
         return url && url.length > 100 ? url : "";
       } catch (e) {
@@ -1395,11 +1413,13 @@
       const now = new Date().toLocaleString("pt-BR");
       const roleLabel = session?.role === "master" ? "Administrador" : "Escola";
 
+      // Força o gráfico a sair da animação para captura
       if (countChart) countChart.update("none");
       if (percentChart) percentChart.update("none");
 
       const countImg = safeChartImage(countChart);
       const percentImg = safeChartImage(percentChart);
+      console.log(`[AMI] Gráficos capturados: count=${countImg.length}b, percent=${percentImg.length}b`);
 
       const kpis = [
         { label: "Total de estudantes", value: fmt(total),
@@ -1431,8 +1451,7 @@
       const wrap = document.createElement("div");
       wrap.id = "pdfReport";
       wrap.style.cssText = `
-        position: fixed; left: -99999px; top: 0;
-        width: 750px; background: #ffffff; padding: 0;
+        width: 750px; background: #ffffff; padding: 20px;
         box-sizing: border-box;
         font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
         color: #1a2433; font-size: 11px; line-height: 1.4;
@@ -1449,8 +1468,7 @@
           #pdfReport .rpt-mark {
             width: 42px; height: 42px; border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
-            background: linear-gradient(135deg, #6e8df1, #4366cb);
-            color: #fff; font-size: 20px; font-weight: 800;
+            background: #14233b; color: #fff; font-size: 20px; font-weight: 800;
           }
           #pdfReport .rpt-brand-name { font-size: 15px; font-weight: 800; letter-spacing: -0.3px; }
           #pdfReport .rpt-brand-sub {
@@ -1495,7 +1513,6 @@
           #pdfReport .rpt-kpi {
             background: #ffffff; border: 1px solid #e2e8f0;
             border-radius: 10px; padding: 12px 12px 14px;
-            position: relative; overflow: hidden;
           }
           #pdfReport .rpt-kpi-label {
             font-size: 9px; color: #5a6779; font-weight: 600; margin-bottom: 8px;
@@ -1519,7 +1536,7 @@
           }
           #pdfReport .rpt-table {
             width: 100%; border-collapse: collapse; font-size: 9.5px;
-            border: 1px solid #e2e8f0; overflow: hidden;
+            border: 1px solid #e2e8f0;
           }
           #pdfReport .rpt-table thead { background: #14233b; color: #ffffff; }
           #pdfReport .rpt-table th {
@@ -1550,7 +1567,7 @@
 
         <div class="rpt-header">
           <div class="rpt-brand">
-            <div class="rpt-mark">&#128202;</div>
+            <div class="rpt-mark">AMI</div>
             <div>
               <div class="rpt-brand-name">AMI · Painel de Monitoramento</div>
               <div class="rpt-brand-sub">Avaliação da Aprendizagem</div>
@@ -1631,7 +1648,7 @@
       return wrap;
     }
 
-   async function generatePDFReport() {
+    async function generatePDFReport() {
       if (!records.length) {
         setStatus("Carregue a base de dados antes de gerar o relatório.", "error");
         return;
@@ -1645,36 +1662,43 @@
       const originalHTML = btn.innerHTML;
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span> Gerando...';
-      $("loadingOverlay").classList.add("show");
 
-      const savedScrollX = window.scrollX;
-      const savedScrollY = window.scrollY;
-      let reportEl = null;
+      // 1) Força atualização dos gráficos antes da captura
+      if (countChart) countChart.update("none");
+      if (percentChart) percentChart.update("none");
+      await new Promise(r => setTimeout(r, 200));
+
+      // 2) Monta o relatório em um HOST fixo (sempre dentro do viewport)
+      //    z-index 45 fica SOB o loadingOverlay (50) → usuário vê só o spinner
+      const host = document.createElement("div");
+      host.id = "pdfReportHost";
+
+      const reportEl = buildReportElement();
+      host.appendChild(reportEl);
+      document.body.appendChild(host);
+
+      // 3) Diagnóstico de dimensões
+      const w = reportEl.offsetWidth;
+      const h = reportEl.offsetHeight;
+      console.log(`[AMI] Relatório montado: ${w}×${h}px, ${filteredRecords.length} registros, ` +
+                  `${reportEl.querySelectorAll("img").length} imagem(ns)`);
+
+      if (w === 0 || h === 0) {
+        console.error("[AMI] Relatório com dimensões zero — abortando.");
+        host.remove();
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+        setStatus("Falha ao montar o relatório (dimensões zero). Tente novamente.", "error");
+        return;
+      }
 
       try {
-        // 1) Garante que os gráficos estejam no estado final antes da captura
-        if (countChart) countChart.update("none");
-        if (percentChart) percentChart.update("none");
-        await new Promise(r => setTimeout(r, 120));
-
-        // 2) Cria o relatório e posiciona DENTRO do viewport
-        // (html2canvas não renderiza elementos fora da área visível)
-        reportEl = buildReportElement();
-        reportEl.style.position = "absolute";
-        reportEl.style.top = "0";
-        reportEl.style.left = "0";
-        reportEl.style.zIndex = "45"; // abaixo do loadingOverlay (z-index 50)
-        document.body.appendChild(reportEl);
-
-        // 3) Scroll top para evitar offsets na captura
-        window.scrollTo(0, 0);
-
-        // 4) Espera o carregamento de fontes web (DM Sans, etc.)
+        // 4) Fonts
         if (document.fonts && document.fonts.ready) {
           try { await document.fonts.ready; } catch (_) {}
         }
 
-        // 5) Espera as imagens (data URLs dos gráficos) carregarem
+        // 5) Imagens
         const imgs = reportEl.querySelectorAll("img");
         await Promise.all(Array.from(imgs).map(img =>
           img.complete && img.naturalWidth > 0
@@ -1682,8 +1706,8 @@
             : new Promise(r => { img.onload = img.onerror = r; })
         ));
 
-        // 6) Settle time (layout, reflow, sub-pixel)
-        await new Promise(r => setTimeout(r, 450));
+        // 6) Settle time
+        await new Promise(r => setTimeout(r, 500));
 
         const schoolName = getReportSchoolName();
         const dateStr = new Date().toISOString().slice(0, 10);
@@ -1701,19 +1725,21 @@
             logging: false,
             scrollX: 0,
             scrollY: 0,
+            width: 750,
             windowWidth: 750,
-            windowHeight: Math.max(reportEl.scrollHeight, 800),
-            // Garante que o clone não herde a posição absoluta nem o overlay
+            // O host já está fixo em (0,0); capturamos ele inteiro
             onclone: (clonedDoc) => {
-              const clone = clonedDoc.getElementById("pdfReport");
-              if (clone) {
-                clone.style.position = "static";
-                clone.style.top = "auto";
-                clone.style.left = "auto";
-                clone.style.zIndex = "auto";
+              // Esconde o overlay no clone (não deve aparecer no PDF)
+              const ov = clonedDoc.getElementById("loadingOverlay");
+              if (ov) ov.style.display = "none";
+              // Garante que o host do relatório ocupe o espaço todo no clone
+              const hst = clonedDoc.getElementById("pdfReportHost");
+              if (hst) {
+                hst.style.position = "static";
+                hst.style.width = "750px";
+                hst.style.height = "auto";
+                hst.style.overflow = "visible";
               }
-              const overlay = clonedDoc.getElementById("loadingOverlay");
-              if (overlay) overlay.style.display = "none";
             }
           },
           jsPDF: { unit: "mm", format: "a4", orientation: "portrait", compress: true },
@@ -1722,14 +1748,12 @@
 
         await html2pdf().set(opt).from(reportEl).save();
         setStatus("Relatório PDF gerado com sucesso.", "success");
-        console.log(`[AMI] PDF gerado: ${fileName} (${reportEl.scrollHeight}px de altura)`);
+        console.log("[AMI] PDF gerado:", fileName);
       } catch (err) {
         console.error("[AMI] Erro ao gerar PDF:", err);
-        setStatus("Não foi possível gerar o PDF. " + (err?.message || ""), "error");
+        setStatus("Não foi possível gerar o PDF. " + (err?.message || "Ver console (F12)."), "error");
       } finally {
-        if (reportEl) reportEl.remove();
-        $("loadingOverlay").classList.remove("show");
-        window.scrollTo(savedScrollX, savedScrollY);
+        host.remove();
         btn.disabled = false;
         btn.innerHTML = originalHTML;
       }
