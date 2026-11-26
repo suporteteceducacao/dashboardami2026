@@ -67,9 +67,7 @@
       background: linear-gradient(135deg, #14233b 0%, #0a1420 100%);
       display: flex; align-items: center; justify-content: center; padding: 1.5rem;
     }
-    html[data-theme="dark"] .login-screen {
-      background: linear-gradient(135deg, #0a1420 0%, #050a12 100%);
-    }
+    html[data-theme="dark"] .login-screen { background: linear-gradient(135deg, #0a1420 0%, #050a12 100%); }
     .login-screen.is-hidden { display: none; }
     .login-card {
       background: var(--card); border-radius: 22px;
@@ -122,9 +120,7 @@
       font-size: .82rem; margin-top: 1rem;
       display: flex; align-items: flex-start; gap: .5rem; line-height: 1.5;
     }
-    html[data-theme="dark"] .login-error {
-      background: #3a1e1e; border-color: #5a2b2b; color: #ffb4ae;
-    }
+    html[data-theme="dark"] .login-error { background: #3a1e1e; border-color: #5a2b2b; color: #ffb4ae; }
     .login-error[hidden] { display: none; }
     .login-error i { margin-top: .15rem; flex-shrink: 0; }
     .login-footer {
@@ -161,9 +157,7 @@
     }
     .sidebar .form-select:focus { border-color: #8199ef; box-shadow: 0 0 0 .2rem rgba(110,141,241,.2); }
     .sidebar .form-select option { color: #202c3d; background: #fff; }
-    .sidebar .form-select:disabled {
-      background-color: #17283f; color: #7a8aa3; cursor: not-allowed;
-    }
+    .sidebar .form-select:disabled { background-color: #17283f; color: #7a8aa3; cursor: not-allowed; }
     .filter-block { margin-bottom: 1.1rem; }
     .side-note { margin-top: 1.2rem; padding: .8rem; background: rgba(255,255,255,.06);
       border: 1px solid rgba(255,255,255,.1); border-radius: .75rem;
@@ -362,9 +356,7 @@
       background: #ffffff !important;
       pointer-events: none !important;
     }
-    #pdfReportHost > #pdfReport {
-      background: #ffffff;
-    }
+    #pdfReportHost > #pdfReport { background: #ffffff; }
 
     @media (min-width: 761px) {
       .app-shell.sidebar-collapsed .sidebar { transform: translateX(-100%); }
@@ -388,9 +380,7 @@
         overflow-y: auto; padding: 1rem; inset: 0 auto 0 0;
       }
       .app-shell:not(.sidebar-collapsed) .sidebar { transform: translateX(0); }
-      .app-shell:not(.sidebar-collapsed) .sidebar-backdrop {
-        opacity: 1; pointer-events: auto;
-      }
+      .app-shell:not(.sidebar-collapsed) .sidebar-backdrop { opacity: 1; pointer-events: auto; }
       .app-shell .main { margin-left: 0; width: 100%; padding: 1.2rem .9rem; }
       .brand { padding-bottom: .8rem; }
       .sidebar .filter-row { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
@@ -700,6 +690,9 @@
     };
     const SESSION_KEY = "ami-session";
     const SIDEBAR_KEY = "ami-sidebar-collapsed";
+
+    /* Largura fixa do relatório em paisagem (A4 landscape ≈ 297mm) */
+    const REPORT_WIDTH = 1050;
 
     /* ============================================================
        ESTADO
@@ -1350,7 +1343,7 @@
     }
 
     /* ============================================================
-       RELATÓRIO PDF
+       RELATÓRIO PDF — A4 PAISAGEM
        ============================================================ */
     function slugify(str) {
       return String(str || "")
@@ -1384,8 +1377,8 @@
       const classes = [...new Set(pool.map(r => r.TURMA))]
         .sort((a, b) => a.localeCompare(b, "pt-BR"));
       if (!classes.length) return "Todas as turmas";
-      if (classes.length > 8) {
-        return classes.slice(0, 8).join(", ") + ` … (+${classes.length - 8} turmas)`;
+      if (classes.length > 12) {
+        return classes.slice(0, 12).join(", ") + ` … (+${classes.length - 12} turmas)`;
       }
       return classes.join(", ");
     }
@@ -1413,7 +1406,6 @@
       const now = new Date().toLocaleString("pt-BR");
       const roleLabel = session?.role === "master" ? "Administrador" : "Escola";
 
-      // Força o gráfico a sair da animação para captura
       if (countChart) countChart.update("none");
       if (percentChart) percentChart.update("none");
 
@@ -1451,7 +1443,7 @@
       const wrap = document.createElement("div");
       wrap.id = "pdfReport";
       wrap.style.cssText = `
-        width: 750px; background: #ffffff; padding: 20px;
+        width: ${REPORT_WIDTH}px; background: #ffffff; padding: 22px 26px;
         box-sizing: border-box;
         font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
         color: #1a2433; font-size: 11px; line-height: 1.4;
@@ -1462,91 +1454,101 @@
           #pdfReport * { box-sizing: border-box; }
           #pdfReport .rpt-header {
             display: flex; justify-content: space-between; align-items: flex-start;
-            padding-bottom: 14px; border-bottom: 3px solid #14233b; margin-bottom: 16px;
+            padding-bottom: 12px; border-bottom: 3px solid #14233b; margin-bottom: 14px;
           }
-          #pdfReport .rpt-brand { display: flex; align-items: center; gap: 10px; }
+          #pdfReport .rpt-brand { display: flex; align-items: center; gap: 12px; }
           #pdfReport .rpt-mark {
-            width: 42px; height: 42px; border-radius: 10px;
+            width: 46px; height: 46px; border-radius: 11px;
             display: flex; align-items: center; justify-content: center;
-            background: #14233b; color: #fff; font-size: 20px; font-weight: 800;
+            background: #14233b; color: #fff; font-size: 15px; font-weight: 800;
+            letter-spacing: .5px;
           }
-          #pdfReport .rpt-brand-name { font-size: 15px; font-weight: 800; letter-spacing: -0.3px; }
+          #pdfReport .rpt-brand-name { font-size: 17px; font-weight: 800; letter-spacing: -0.4px; }
           #pdfReport .rpt-brand-sub {
-            font-size: 8px; color: #5a6779; letter-spacing: 1.2px;
-            text-transform: uppercase; margin-top: 2px;
+            font-size: 9px; color: #5a6779; letter-spacing: 1.4px;
+            text-transform: uppercase; margin-top: 3px;
           }
           #pdfReport .rpt-meta {
-            text-align: right; font-size: 9px; color: #5a6779; line-height: 1.6;
+            text-align: right; font-size: 10px; color: #5a6779; line-height: 1.65;
           }
           #pdfReport .rpt-meta strong { color: #1a2433; }
           #pdfReport h1 {
-            font-size: 22px; font-weight: 800; letter-spacing: -0.6px;
-            margin: 0 0 4px 0; color: #14233b;
+            font-size: 24px; font-weight: 800; letter-spacing: -0.7px;
+            margin: 0 0 3px 0; color: #14233b;
           }
-          #pdfReport .rpt-sub { font-size: 11px; color: #5a6779; margin-bottom: 16px; }
+          #pdfReport .rpt-sub { font-size: 12px; color: #5a6779; margin-bottom: 14px; }
+          /* Info em 3 colunas horizontais */
           #pdfReport .rpt-info-grid {
-            display: grid; grid-template-columns: repeat(4, 1fr);
-            gap: 8px; margin-bottom: 20px;
+            display: grid; grid-template-columns: 1fr 0.7fr 1.6fr;
+            gap: 10px; margin-bottom: 16px;
           }
           #pdfReport .rpt-info-item {
             background: #f4f7fb; border: 1px solid #e2e8f0;
-            padding: 10px 12px; border-radius: 8px;
+            padding: 11px 14px; border-radius: 9px;
           }
           #pdfReport .rpt-info-label {
-            font-size: 8px; color: #5a6779; text-transform: uppercase;
-            letter-spacing: 0.6px; font-weight: 700; margin-bottom: 3px;
+            font-size: 9px; color: #5a6779; text-transform: uppercase;
+            letter-spacing: 0.7px; font-weight: 700; margin-bottom: 4px;
           }
           #pdfReport .rpt-info-value {
-            font-size: 11px; font-weight: 700; color: #1a2433;
-            word-break: break-word; line-height: 1.3;
+            font-size: 13px; font-weight: 700; color: #1a2433;
+            word-break: break-word; line-height: 1.35;
           }
           #pdfReport .rpt-section-title {
-            font-size: 14px; font-weight: 800; color: #14233b;
-            margin: 22px 0 10px 0; padding-bottom: 6px;
+            font-size: 15px; font-weight: 800; color: #14233b;
+            margin: 18px 0 10px 0; padding-bottom: 6px;
             border-bottom: 1.5px solid #14233b;
           }
           #pdfReport .rpt-section-title:first-of-type { margin-top: 0; }
+          /* KPIs em 4 colunas */
           #pdfReport .rpt-kpi-grid {
             display: grid; grid-template-columns: repeat(4, 1fr);
-            gap: 8px; margin-bottom: 8px;
+            gap: 10px; margin-bottom: 8px;
           }
           #pdfReport .rpt-kpi {
             background: #ffffff; border: 1px solid #e2e8f0;
-            border-radius: 10px; padding: 12px 12px 14px;
+            border-radius: 11px; padding: 14px 16px 16px;
           }
           #pdfReport .rpt-kpi-label {
-            font-size: 9px; color: #5a6779; font-weight: 600; margin-bottom: 8px;
+            font-size: 10px; color: #5a6779; font-weight: 700; margin-bottom: 10px;
+            text-transform: uppercase; letter-spacing: .4px;
           }
           #pdfReport .rpt-kpi-value {
-            font-size: 24px; font-weight: 800; letter-spacing: -0.8px;
-            line-height: 1; margin-bottom: 6px;
+            font-size: 30px; font-weight: 800; letter-spacing: -1px;
+            line-height: 1; margin-bottom: 8px;
           }
           #pdfReport .rpt-kpi-pct {
-            font-size: 15px; font-weight: 800; letter-spacing: -0.3px;
+            font-size: 17px; font-weight: 800; letter-spacing: -0.4px;
+          }
+          /* GRÁFICOS LADO A LADO */
+          #pdfReport .rpt-charts-row {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 12px; margin-bottom: 10px;
           }
           #pdfReport .rpt-chart-block {
             background: #ffffff; border: 1px solid #e2e8f0;
-            border-radius: 10px; padding: 12px; margin-bottom: 10px;
+            border-radius: 11px; padding: 12px 14px;
           }
           #pdfReport .rpt-chart-title {
-            font-size: 11px; font-weight: 800; margin: 0 0 8px 0; color: #1a2433;
+            font-size: 12px; font-weight: 800; margin: 0 0 8px 0; color: #1a2433;
+            padding-bottom: 6px; border-bottom: 1px solid #e2e8f0;
           }
           #pdfReport .rpt-chart-block img {
             width: 100%; height: auto; display: block;
           }
           #pdfReport .rpt-table {
-            width: 100%; border-collapse: collapse; font-size: 9.5px;
+            width: 100%; border-collapse: collapse; font-size: 10.5px;
             border: 1px solid #e2e8f0;
           }
           #pdfReport .rpt-table thead { background: #14233b; color: #ffffff; }
           #pdfReport .rpt-table th {
-            padding: 8px 8px; text-align: left; font-size: 8.5px;
-            text-transform: uppercase; letter-spacing: 0.5px;
+            padding: 10px 12px; text-align: left; font-size: 9px;
+            text-transform: uppercase; letter-spacing: 0.6px;
             font-weight: 700; white-space: nowrap;
           }
           #pdfReport .rpt-table th.rpt-td-num { text-align: right; }
           #pdfReport .rpt-table td {
-            padding: 7px 8px; border-bottom: 1px solid #e2e8f0;
+            padding: 9px 12px; border-bottom: 1px solid #e2e8f0;
             color: #1a2433; vertical-align: middle;
           }
           #pdfReport .rpt-table tbody tr:nth-child(even) { background: #f8fafc; }
@@ -1555,14 +1557,14 @@
           #pdfReport .rpt-td-num { text-align: right; font-variant-numeric: tabular-nums; }
           #pdfReport .rpt-td-total { font-weight: 800; }
           #pdfReport .rpt-empty {
-            text-align: center; color: #5a6779; padding: 20px !important;
+            text-align: center; color: #5a6779; padding: 24px !important;
           }
           #pdfReport .rpt-footer {
-            margin-top: 24px; padding-top: 10px; border-top: 1px solid #e2e8f0;
+            margin-top: 20px; padding-top: 10px; border-top: 1px solid #e2e8f0;
             display: flex; justify-content: space-between;
-            font-size: 8.5px; color: #5a6779;
+            font-size: 9px; color: #5a6779;
           }
-          #pdfReport .page-break { page-break-before: always; }
+          #pdfReport .rpt-page-break { page-break-before: always; }
         </style>
 
         <div class="rpt-header">
@@ -1576,6 +1578,7 @@
           <div class="rpt-meta">
             <div><strong>Gerado em:</strong> ${escapeHtml(now)}</div>
             <div><strong>Sessão:</strong> ${escapeHtml(roleLabel)}</div>
+            <div><strong>Filtros:</strong> ${escapeHtml(turmas)}</div>
           </div>
         </div>
 
@@ -1591,8 +1594,8 @@
             <div class="rpt-info-label">INEP</div>
             <div class="rpt-info-value">${escapeHtml(inep)}</div>
           </div>
-          <div class="rpt-info-item" style="grid-column: span 2;">
-            <div class="rpt-info-label">Turmas (${filteredRecords.length} registro(s))</div>
+          <div class="rpt-info-item">
+            <div class="rpt-info-label">Turmas · ${filteredRecords.length} registro(s)</div>
             <div class="rpt-info-value">${escapeHtml(turmas)}</div>
           </div>
         </div>
@@ -1609,20 +1612,22 @@
         </div>
 
         <h2 class="rpt-section-title">2. Análise gráfica</h2>
-        <div class="rpt-chart-block">
-          <div class="rpt-chart-title">2.1 Quantidade por categoria</div>
-          ${countImg
-            ? `<img src="${countImg}" alt="Gráfico de quantidade por categoria" />`
-            : '<div class="rpt-empty">Gráfico indisponível</div>'}
-        </div>
-        <div class="rpt-chart-block">
-          <div class="rpt-chart-title">2.2 Distribuição percentual por nível</div>
-          ${percentImg
-            ? `<img src="${percentImg}" alt="Gráfico de distribuição percentual" />`
-            : '<div class="rpt-empty">Gráfico indisponível</div>'}
+        <div class="rpt-charts-row">
+          <div class="rpt-chart-block">
+            <div class="rpt-chart-title">2.1 Quantidade por categoria</div>
+            ${countImg
+              ? `<img src="${countImg}" alt="Gráfico de quantidade por categoria" />`
+              : '<div class="rpt-empty">Gráfico indisponível</div>'}
+          </div>
+          <div class="rpt-chart-block">
+            <div class="rpt-chart-title">2.2 Distribuição percentual por nível</div>
+            ${percentImg
+              ? `<img src="${percentImg}" alt="Gráfico de distribuição percentual" />`
+              : '<div class="rpt-empty">Gráfico indisponível</div>'}
+          </div>
         </div>
 
-        <div class="page-break"></div>
+        <div class="rpt-page-break"></div>
         <h2 class="rpt-section-title">3. Detalhamento dos registros</h2>
         <table class="rpt-table">
           <thead>
@@ -1663,13 +1668,10 @@
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span> Gerando...';
 
-      // 1) Força atualização dos gráficos antes da captura
       if (countChart) countChart.update("none");
       if (percentChart) percentChart.update("none");
       await new Promise(r => setTimeout(r, 200));
 
-      // 2) Monta o relatório em um HOST fixo (sempre dentro do viewport)
-      //    z-index 45 fica SOB o loadingOverlay (50) → usuário vê só o spinner
       const host = document.createElement("div");
       host.id = "pdfReportHost";
 
@@ -1677,7 +1679,6 @@
       host.appendChild(reportEl);
       document.body.appendChild(host);
 
-      // 3) Diagnóstico de dimensões
       const w = reportEl.offsetWidth;
       const h = reportEl.offsetHeight;
       console.log(`[AMI] Relatório montado: ${w}×${h}px, ${filteredRecords.length} registros, ` +
@@ -1693,12 +1694,10 @@
       }
 
       try {
-        // 4) Fonts
         if (document.fonts && document.fonts.ready) {
           try { await document.fonts.ready; } catch (_) {}
         }
 
-        // 5) Imagens
         const imgs = reportEl.querySelectorAll("img");
         await Promise.all(Array.from(imgs).map(img =>
           img.complete && img.naturalWidth > 0
@@ -1706,7 +1705,6 @@
             : new Promise(r => { img.onload = img.onerror = r; })
         ));
 
-        // 6) Settle time
         await new Promise(r => setTimeout(r, 500));
 
         const schoolName = getReportSchoolName();
@@ -1714,7 +1712,8 @@
         const fileName = `relatorio_AMI_${slugify(schoolName)}_${dateStr}.pdf`;
 
         const opt = {
-          margin: [10, 8, 12, 8],
+          // A4 paisagem: margens [top, left, bottom, right] em mm
+          margin: [8, 8, 10, 8],
           filename: fileName,
           image: { type: "jpeg", quality: 0.95 },
           html2canvas: {
@@ -1725,25 +1724,22 @@
             logging: false,
             scrollX: 0,
             scrollY: 0,
-            width: 750,
-            windowWidth: 750,
-            // O host já está fixo em (0,0); capturamos ele inteiro
+            width: REPORT_WIDTH,
+            windowWidth: REPORT_WIDTH,
             onclone: (clonedDoc) => {
-              // Esconde o overlay no clone (não deve aparecer no PDF)
               const ov = clonedDoc.getElementById("loadingOverlay");
               if (ov) ov.style.display = "none";
-              // Garante que o host do relatório ocupe o espaço todo no clone
               const hst = clonedDoc.getElementById("pdfReportHost");
               if (hst) {
                 hst.style.position = "static";
-                hst.style.width = "750px";
+                hst.style.width = REPORT_WIDTH + "px";
                 hst.style.height = "auto";
                 hst.style.overflow = "visible";
               }
             }
           },
-          jsPDF: { unit: "mm", format: "a4", orientation: "portrait", compress: true },
-          pagebreak: { mode: ["css", "legacy"], avoid: ["tr", "img", ".rpt-kpi"] }
+          jsPDF: { unit: "mm", format: "a4", orientation: "landscape", compress: true },
+          pagebreak: { mode: ["css", "legacy"], avoid: ["tr", "img", ".rpt-kpi", ".rpt-chart-block"] }
         };
 
         await html2pdf().set(opt).from(reportEl).save();
