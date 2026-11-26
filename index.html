@@ -344,7 +344,6 @@
       transition: opacity .28s ease;
     }
 
-    /* Container temporário do PDF — fixed para sempre estar no viewport */
     #pdfReportHost {
       position: fixed !important;
       top: 0 !important;
@@ -690,8 +689,6 @@
     };
     const SESSION_KEY = "ami-session";
     const SIDEBAR_KEY = "ami-sidebar-collapsed";
-
-    /* Largura fixa do relatório em paisagem (A4 landscape ≈ 297mm) */
     const REPORT_WIDTH = 1050;
 
     /* ============================================================
@@ -1397,7 +1394,33 @@
       }
     }
 
-    function buildReportElement() {
+    /* Captura os gráficos com altura compacta de 280px para caberem na folha 1 */
+    async function captureChartsForPDF() {
+      const countWrap = $("countChart") ? $("countChart").parentElement : null;
+      const percentWrap = $("percentChartWrap");
+      const origCount = countWrap ? countWrap.style.height : "";
+      const origPercent = percentWrap ? percentWrap.style.height : "";
+
+      try {
+        if (countWrap) countWrap.style.height = "280px";
+        if (percentWrap) percentWrap.style.height = "280px";
+        if (countChart) countChart.resize();
+        if (percentChart) percentChart.resize();
+        await new Promise(r => setTimeout(r, 400));
+
+        return {
+          countImg: safeChartImage(countChart),
+          percentImg: safeChartImage(percentChart)
+        };
+      } finally {
+        if (countWrap) countWrap.style.height = origCount;
+        if (percentWrap) percentWrap.style.height = origPercent;
+        if (countChart) countChart.resize();
+        if (percentChart) percentChart.resize();
+      }
+    }
+
+    function buildReportElement(countImg, percentImg) {
       const escola = getReportSchoolName();
       const inep = getReportInep();
       const turmas = getReportClasses();
@@ -1406,12 +1429,7 @@
       const now = new Date().toLocaleString("pt-BR");
       const roleLabel = session?.role === "master" ? "Administrador" : "Escola";
 
-      if (countChart) countChart.update("none");
-      if (percentChart) percentChart.update("none");
-
-      const countImg = safeChartImage(countChart);
-      const percentImg = safeChartImage(percentChart);
-      console.log(`[AMI] Gráficos capturados: count=${countImg.length}b, percent=${percentImg.length}b`);
+      console.log(`[AMI] Gráficos recebidos: count=${countImg.length}b, percent=${percentImg.length}b`);
 
       const kpis = [
         { label: "Total de estudantes", value: fmt(total),
@@ -1443,7 +1461,7 @@
       const wrap = document.createElement("div");
       wrap.id = "pdfReport";
       wrap.style.cssText = `
-        width: ${REPORT_WIDTH}px; background: #ffffff; padding: 22px 26px;
+        width: ${REPORT_WIDTH}px; background: #ffffff; padding: 16px 20px;
         box-sizing: border-box;
         font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
         color: #1a2433; font-size: 11px; line-height: 1.4;
@@ -1454,101 +1472,105 @@
           #pdfReport * { box-sizing: border-box; }
           #pdfReport .rpt-header {
             display: flex; justify-content: space-between; align-items: flex-start;
-            padding-bottom: 12px; border-bottom: 3px solid #14233b; margin-bottom: 14px;
+            padding-bottom: 8px; border-bottom: 2px solid #14233b; margin-bottom: 10px;
           }
-          #pdfReport .rpt-brand { display: flex; align-items: center; gap: 12px; }
+          #pdfReport .rpt-brand { display: flex; align-items: center; gap: 10px; }
           #pdfReport .rpt-mark {
-            width: 46px; height: 46px; border-radius: 11px;
+            width: 36px; height: 36px; border-radius: 9px;
             display: flex; align-items: center; justify-content: center;
-            background: #14233b; color: #fff; font-size: 15px; font-weight: 800;
+            background: #14233b; color: #fff; font-size: 13px; font-weight: 800;
             letter-spacing: .5px;
           }
-          #pdfReport .rpt-brand-name { font-size: 17px; font-weight: 800; letter-spacing: -0.4px; }
+          #pdfReport .rpt-brand-name { font-size: 15px; font-weight: 800; letter-spacing: -0.3px; }
           #pdfReport .rpt-brand-sub {
-            font-size: 9px; color: #5a6779; letter-spacing: 1.4px;
-            text-transform: uppercase; margin-top: 3px;
+            font-size: 8px; color: #5a6779; letter-spacing: 1.3px;
+            text-transform: uppercase; margin-top: 2px;
           }
           #pdfReport .rpt-meta {
-            text-align: right; font-size: 10px; color: #5a6779; line-height: 1.65;
+            text-align: right; font-size: 9px; color: #5a6779; line-height: 1.55;
           }
           #pdfReport .rpt-meta strong { color: #1a2433; }
           #pdfReport h1 {
-            font-size: 24px; font-weight: 800; letter-spacing: -0.7px;
+            font-size: 20px; font-weight: 800; letter-spacing: -0.5px;
             margin: 0 0 3px 0; color: #14233b;
           }
-          #pdfReport .rpt-sub { font-size: 12px; color: #5a6779; margin-bottom: 14px; }
-          /* Info em 3 colunas horizontais */
+          #pdfReport .rpt-sub { font-size: 10px; color: #5a6779; margin-bottom: 10px; }
           #pdfReport .rpt-info-grid {
             display: grid; grid-template-columns: 1fr 0.7fr 1.6fr;
-            gap: 10px; margin-bottom: 16px;
+            gap: 8px; margin-bottom: 10px;
           }
           #pdfReport .rpt-info-item {
             background: #f4f7fb; border: 1px solid #e2e8f0;
-            padding: 11px 14px; border-radius: 9px;
+            padding: 8px 11px; border-radius: 8px;
           }
           #pdfReport .rpt-info-label {
-            font-size: 9px; color: #5a6779; text-transform: uppercase;
-            letter-spacing: 0.7px; font-weight: 700; margin-bottom: 4px;
+            font-size: 8px; color: #5a6779; text-transform: uppercase;
+            letter-spacing: 0.7px; font-weight: 700; margin-bottom: 3px;
           }
           #pdfReport .rpt-info-value {
-            font-size: 13px; font-weight: 700; color: #1a2433;
-            word-break: break-word; line-height: 1.35;
+            font-size: 11px; font-weight: 700; color: #1a2433;
+            word-break: break-word; line-height: 1.3;
           }
           #pdfReport .rpt-section-title {
-            font-size: 15px; font-weight: 800; color: #14233b;
-            margin: 18px 0 10px 0; padding-bottom: 6px;
+            font-size: 13px; font-weight: 800; color: #14233b;
+            margin: 10px 0 8px 0; padding-bottom: 5px;
             border-bottom: 1.5px solid #14233b;
           }
           #pdfReport .rpt-section-title:first-of-type { margin-top: 0; }
-          /* KPIs em 4 colunas */
           #pdfReport .rpt-kpi-grid {
             display: grid; grid-template-columns: repeat(4, 1fr);
-            gap: 10px; margin-bottom: 8px;
+            gap: 9px; margin-bottom: 6px;
           }
           #pdfReport .rpt-kpi {
             background: #ffffff; border: 1px solid #e2e8f0;
-            border-radius: 11px; padding: 14px 16px 16px;
+            border-radius: 10px; padding: 10px 12px 12px;
           }
           #pdfReport .rpt-kpi-label {
-            font-size: 10px; color: #5a6779; font-weight: 700; margin-bottom: 10px;
+            font-size: 9px; color: #5a6779; font-weight: 700; margin-bottom: 6px;
             text-transform: uppercase; letter-spacing: .4px;
           }
           #pdfReport .rpt-kpi-value {
-            font-size: 30px; font-weight: 800; letter-spacing: -1px;
-            line-height: 1; margin-bottom: 8px;
+            font-size: 26px; font-weight: 800; letter-spacing: -0.9px;
+            line-height: 1; margin-bottom: 5px;
           }
           #pdfReport .rpt-kpi-pct {
-            font-size: 17px; font-weight: 800; letter-spacing: -0.4px;
+            font-size: 15px; font-weight: 800; letter-spacing: -0.3px;
           }
-          /* GRÁFICOS LADO A LADO */
           #pdfReport .rpt-charts-row {
             display: grid; grid-template-columns: 1fr 1fr;
-            gap: 12px; margin-bottom: 10px;
+            gap: 10px; margin-bottom: 4px;
           }
           #pdfReport .rpt-chart-block {
             background: #ffffff; border: 1px solid #e2e8f0;
-            border-radius: 11px; padding: 12px 14px;
+            border-radius: 10px; padding: 9px 11px;
           }
           #pdfReport .rpt-chart-title {
-            font-size: 12px; font-weight: 800; margin: 0 0 8px 0; color: #1a2433;
-            padding-bottom: 6px; border-bottom: 1px solid #e2e8f0;
+            font-size: 10px; font-weight: 800; margin: 0 0 7px 0; color: #1a2433;
+            padding-bottom: 5px; border-bottom: 1px solid #e2e8f0;
           }
           #pdfReport .rpt-chart-block img {
-            width: 100%; height: auto; display: block;
+            max-width: 100%; max-height: 280px;
+            width: auto; height: auto; display: block; margin: 0 auto;
+            object-fit: contain;
+          }
+          #pdfReport .rpt-page-break {
+            page-break-before: always;
+            break-before: page;
+            height: 0; line-height: 0;
           }
           #pdfReport .rpt-table {
-            width: 100%; border-collapse: collapse; font-size: 10.5px;
+            width: 100%; border-collapse: collapse; font-size: 10px;
             border: 1px solid #e2e8f0;
           }
           #pdfReport .rpt-table thead { background: #14233b; color: #ffffff; }
           #pdfReport .rpt-table th {
-            padding: 10px 12px; text-align: left; font-size: 9px;
-            text-transform: uppercase; letter-spacing: 0.6px;
+            padding: 8px 10px; text-align: left; font-size: 8.5px;
+            text-transform: uppercase; letter-spacing: 0.5px;
             font-weight: 700; white-space: nowrap;
           }
           #pdfReport .rpt-table th.rpt-td-num { text-align: right; }
           #pdfReport .rpt-table td {
-            padding: 9px 12px; border-bottom: 1px solid #e2e8f0;
+            padding: 7px 10px; border-bottom: 1px solid #e2e8f0;
             color: #1a2433; vertical-align: middle;
           }
           #pdfReport .rpt-table tbody tr:nth-child(even) { background: #f8fafc; }
@@ -1557,14 +1579,13 @@
           #pdfReport .rpt-td-num { text-align: right; font-variant-numeric: tabular-nums; }
           #pdfReport .rpt-td-total { font-weight: 800; }
           #pdfReport .rpt-empty {
-            text-align: center; color: #5a6779; padding: 24px !important;
+            text-align: center; color: #5a6779; padding: 22px !important;
           }
           #pdfReport .rpt-footer {
-            margin-top: 20px; padding-top: 10px; border-top: 1px solid #e2e8f0;
+            margin-top: 14px; padding-top: 8px; border-top: 1px solid #e2e8f0;
             display: flex; justify-content: space-between;
-            font-size: 9px; color: #5a6779;
+            font-size: 8.5px; color: #5a6779;
           }
-          #pdfReport .rpt-page-break { page-break-before: always; }
         </style>
 
         <div class="rpt-header">
@@ -1668,43 +1689,35 @@
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span> Gerando...';
 
-      if (countChart) countChart.update("none");
-      if (percentChart) percentChart.update("none");
-      await new Promise(r => setTimeout(r, 200));
-
-      const host = document.createElement("div");
-      host.id = "pdfReportHost";
-
-      const reportEl = buildReportElement();
-      host.appendChild(reportEl);
-      document.body.appendChild(host);
-
-      const w = reportEl.offsetWidth;
-      const h = reportEl.offsetHeight;
-      console.log(`[AMI] Relatório montado: ${w}×${h}px, ${filteredRecords.length} registros, ` +
-                  `${reportEl.querySelectorAll("img").length} imagem(ns)`);
-
-      if (w === 0 || h === 0) {
-        console.error("[AMI] Relatório com dimensões zero — abortando.");
-        host.remove();
-        btn.disabled = false;
-        btn.innerHTML = originalHTML;
-        setStatus("Falha ao montar o relatório (dimensões zero). Tente novamente.", "error");
-        return;
-      }
-
+      let host = null;
       try {
+        const { countImg, percentImg } = await captureChartsForPDF();
+
+        host = document.createElement("div");
+        host.id = "pdfReportHost";
+
+        const reportEl = buildReportElement(countImg, percentImg);
+        host.appendChild(reportEl);
+        document.body.appendChild(host);
+
+        const w = reportEl.offsetWidth;
+        const h = reportEl.offsetHeight;
+        console.log(`[AMI] Relatório montado: ${w}×${h}px, ${filteredRecords.length} registros, ` +
+                    `${reportEl.querySelectorAll("img").length} imagem(ns)`);
+
+        if (w === 0 || h === 0) {
+          throw new Error("Relatório com dimensões zero.");
+        }
+
         if (document.fonts && document.fonts.ready) {
           try { await document.fonts.ready; } catch (_) {}
         }
-
         const imgs = reportEl.querySelectorAll("img");
         await Promise.all(Array.from(imgs).map(img =>
           img.complete && img.naturalWidth > 0
             ? Promise.resolve()
             : new Promise(r => { img.onload = img.onerror = r; })
         ));
-
         await new Promise(r => setTimeout(r, 500));
 
         const schoolName = getReportSchoolName();
@@ -1712,8 +1725,7 @@
         const fileName = `relatorio_AMI_${slugify(schoolName)}_${dateStr}.pdf`;
 
         const opt = {
-          // A4 paisagem: margens [top, left, bottom, right] em mm
-          margin: [8, 8, 10, 8],
+          margin: [8, 6, 8, 6],
           filename: fileName,
           image: { type: "jpeg", quality: 0.95 },
           html2canvas: {
@@ -1739,17 +1751,20 @@
             }
           },
           jsPDF: { unit: "mm", format: "a4", orientation: "landscape", compress: true },
-          pagebreak: { mode: ["css", "legacy"], avoid: ["tr", "img", ".rpt-kpi", ".rpt-chart-block"] }
+          pagebreak: {
+            mode: ["css", "legacy"],
+            avoid: ["tr", "img", ".rpt-kpi", ".rpt-chart-block", ".rpt-info-item"]
+          }
         };
 
         await html2pdf().set(opt).from(reportEl).save();
         setStatus("Relatório PDF gerado com sucesso.", "success");
-        console.log("[AMI] PDF gerado:", fileName);
+        console.log(`[AMI] PDF gerado: ${fileName} (folha 1 = cabeçalho+KPIs+gráficos, folha 2 = tabela)`);
       } catch (err) {
         console.error("[AMI] Erro ao gerar PDF:", err);
         setStatus("Não foi possível gerar o PDF. " + (err?.message || "Ver console (F12)."), "error");
       } finally {
-        host.remove();
+        if (host) host.remove();
         btn.disabled = false;
         btn.innerHTML = originalHTML;
       }
