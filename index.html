@@ -344,18 +344,23 @@
       transition: opacity .28s ease;
     }
 
+    /* ============================================================
+       PATCH 1 — Host do PDF sem !important/height/overflow fixos
+       ============================================================ */
     #pdfReportHost {
-      position: fixed !important;
-      top: 0 !important;
-      left: 0 !important;
-      width: 100vw !important;
-      height: 100vh !important;
-      overflow: hidden !important;
-      z-index: 45 !important;
-      background: #ffffff !important;
-      pointer-events: none !important;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 1000px;
+      height: auto;
+      z-index: 45;
+      background: #ffffff;
+      pointer-events: none;
     }
-    #pdfReportHost > #pdfReport { background: #ffffff; }
+    #pdfReportHost > #pdfReport {
+      background: #ffffff;
+      margin: 0 auto;
+    }
 
     @media (min-width: 761px) {
       .app-shell.sidebar-collapsed .sidebar { transform: translateX(-100%); }
@@ -689,7 +694,9 @@
     };
     const SESSION_KEY = "ami-session";
     const SIDEBAR_KEY = "ami-sidebar-collapsed";
-    const REPORT_WIDTH = 1050;
+
+    /* PATCH 5: 1000px (margem segura em A4 paisagem) */
+    const REPORT_WIDTH = 1000;
 
     /* ============================================================
        ESTADO
@@ -1394,7 +1401,6 @@
       }
     }
 
-    /* Captura os gráficos com altura compacta de 280px para caberem na folha 1 */
     async function captureChartsForPDF() {
       const countWrap = $("countChart") ? $("countChart").parentElement : null;
       const percentWrap = $("percentChartWrap");
@@ -1460,16 +1466,25 @@
 
       const wrap = document.createElement("div");
       wrap.id = "pdfReport";
+      /* PATCH 6: padding, margin 0 auto, text-rendering geometricPrecision */
       wrap.style.cssText = `
-        width: ${REPORT_WIDTH}px; background: #ffffff; padding: 16px 20px;
+        width: ${REPORT_WIDTH}px; background: #ffffff; padding: 16px 22px;
         box-sizing: border-box;
+        margin: 0 auto;
         font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
         color: #1a2433; font-size: 11px; line-height: 1.4;
+        text-rendering: geometricPrecision;
       `;
 
       wrap.innerHTML = `
         <style>
           #pdfReport * { box-sizing: border-box; }
+          /* PATCH 4: text-rendering + text-shadow none em tudo */
+          #pdfReport, #pdfReport * {
+            text-rendering: geometricPrecision;
+            -webkit-font-smoothing: antialiased;
+            text-shadow: none !important;
+          }
           #pdfReport .rpt-header {
             display: flex; justify-content: space-between; align-items: flex-start;
             padding-bottom: 8px; border-bottom: 2px solid #14233b; margin-bottom: 10px;
@@ -1563,10 +1578,14 @@
             border: 1px solid #e2e8f0;
           }
           #pdfReport .rpt-table thead { background: #14233b; color: #ffffff; }
+          /* PATCH 4: letter-spacing 0 + text-shadow none nos th */
           #pdfReport .rpt-table th {
             padding: 8px 10px; text-align: left; font-size: 8.5px;
-            text-transform: uppercase; letter-spacing: 0.5px;
+            text-transform: uppercase;
+            letter-spacing: 0;
             font-weight: 700; white-space: nowrap;
+            text-shadow: none;
+            -webkit-text-stroke: 0;
           }
           #pdfReport .rpt-table th.rpt-td-num { text-align: right; }
           #pdfReport .rpt-table td {
@@ -1731,22 +1750,30 @@
           html2canvas: {
             scale: 2,
             useCORS: true,
-            letterRendering: true,
+            /* PATCH 3: letterRendering removido (causa duplicação), windowHeight adicionado */
             backgroundColor: "#ffffff",
             logging: false,
             scrollX: 0,
             scrollY: 0,
             width: REPORT_WIDTH,
             windowWidth: REPORT_WIDTH,
+            windowHeight: 1000,
+            /* PATCH 2: onclone usa setProperty com important para neutralizar o fixed */
             onclone: (clonedDoc) => {
               const ov = clonedDoc.getElementById("loadingOverlay");
-              if (ov) ov.style.display = "none";
+              if (ov) ov.style.setProperty("display", "none", "important");
+
               const hst = clonedDoc.getElementById("pdfReportHost");
               if (hst) {
-                hst.style.position = "static";
-                hst.style.width = REPORT_WIDTH + "px";
-                hst.style.height = "auto";
-                hst.style.overflow = "visible";
+                hst.style.setProperty("position", "static", "important");
+                hst.style.setProperty("top", "auto", "important");
+                hst.style.setProperty("left", "auto", "important");
+                hst.style.setProperty("width", REPORT_WIDTH + "px", "important");
+                hst.style.setProperty("height", "auto", "important");
+                hst.style.setProperty("min-height", "auto", "important");
+                hst.style.setProperty("max-height", "none", "important");
+                hst.style.setProperty("overflow", "visible", "important");
+                hst.style.setProperty("display", "block", "important");
               }
             }
           },
