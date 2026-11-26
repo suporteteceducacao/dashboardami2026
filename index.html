@@ -1373,6 +1373,19 @@
       return classes.join(", ");
     }
 
+    function safeChartImage(chart) {
+      try {
+        if (!chart) return "";
+        if (!chart.data || !chart.data.datasets || chart.data.datasets.length === 0) return "";
+        if (!chart.data.labels || chart.data.labels.length === 0) return "";
+        const url = chart.toBase64Image("image/png", 1);
+        return url && url.length > 100 ? url : "";
+      } catch (e) {
+        console.warn("[AMI] Falha ao capturar gráfico:", e);
+        return "";
+      }
+    }
+
     function buildReportElement() {
       const escola = getReportSchoolName();
       const inep = getReportInep();
@@ -1385,8 +1398,8 @@
       if (countChart) countChart.update("none");
       if (percentChart) percentChart.update("none");
 
-      const countImg = countChart ? countChart.toBase64Image("image/png", 1) : "";
-      const percentImg = percentChart ? percentChart.toBase64Image("image/png", 1) : "";
+      const countImg = safeChartImage(countChart);
+      const percentImg = safeChartImage(percentChart);
 
       const kpis = [
         { label: "Total de estudantes", value: fmt(total),
@@ -1618,7 +1631,7 @@
       return wrap;
     }
 
-    async function generatePDFReport() {
+   async function generatePDFReport() {
       if (!records.length) {
         setStatus("Carregue a base de dados antes de gerar o relatório.", "error");
         return;
@@ -1632,17 +1645,45 @@
       const originalHTML = btn.innerHTML;
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span> Gerando...';
+      $("loadingOverlay").classList.add("show");
 
+      const savedScrollX = window.scrollX;
+      const savedScrollY = window.scrollY;
       let reportEl = null;
+
       try {
+        // 1) Garante que os gráficos estejam no estado final antes da captura
+        if (countChart) countChart.update("none");
+        if (percentChart) percentChart.update("none");
+        await new Promise(r => setTimeout(r, 120));
+
+        // 2) Cria o relatório e posiciona DENTRO do viewport
+        // (html2canvas não renderiza elementos fora da área visível)
         reportEl = buildReportElement();
+        reportEl.style.position = "absolute";
+        reportEl.style.top = "0";
+        reportEl.style.left = "0";
+        reportEl.style.zIndex = "45"; // abaixo do loadingOverlay (z-index 50)
         document.body.appendChild(reportEl);
 
+        // 3) Scroll top para evitar offsets na captura
+        window.scrollTo(0, 0);
+
+        // 4) Espera o carregamento de fontes web (DM Sans, etc.)
+        if (document.fonts && document.fonts.ready) {
+          try { await document.fonts.ready; } catch (_) {}
+        }
+
+        // 5) Espera as imagens (data URLs dos gráficos) carregarem
         const imgs = reportEl.querySelectorAll("img");
         await Promise.all(Array.from(imgs).map(img =>
-          img.complete ? Promise.resolve() : new Promise(r => { img.onload = img.onerror = r; })
+          img.complete && img.naturalWidth > 0
+            ? Promise.resolve()
+            : new Promise(r => { img.onload = img.onerror = r; })
         ));
-        await new Promise(r => setTimeout(r, 200));
+
+        // 6) Settle time (layout, reflow, sub-pixel)
+        await new Promise(r => setTimeout(r, 450));
 
         const schoolName = getReportSchoolName();
         const dateStr = new Date().toISOString().slice(0, 10);
@@ -1658,7 +1699,22 @@
             letterRendering: true,
             backgroundColor: "#ffffff",
             logging: false,
-            windowWidth: 750
+            scrollX: 0,
+            scrollY: 0,
+            windowWidth: 750,
+            windowHeight: Math.max(reportEl.scrollHeight, 800),
+            // Garante que o clone não herde a posição absoluta nem o overlay
+            onclone: (clonedDoc) => {
+              const clone = clonedDoc.getElementById("pdfReport");
+              if (clone) {
+                clone.style.position = "static";
+                clone.style.top = "auto";
+                clone.style.left = "auto";
+                clone.style.zIndex = "auto";
+              }
+              const overlay = clonedDoc.getElementById("loadingOverlay");
+              if (overlay) overlay.style.display = "none";
+            }
           },
           jsPDF: { unit: "mm", format: "a4", orientation: "portrait", compress: true },
           pagebreak: { mode: ["css", "legacy"], avoid: ["tr", "img", ".rpt-kpi"] }
@@ -1666,11 +1722,14 @@
 
         await html2pdf().set(opt).from(reportEl).save();
         setStatus("Relatório PDF gerado com sucesso.", "success");
+        console.log(`[AMI] PDF gerado: ${fileName} (${reportEl.scrollHeight}px de altura)`);
       } catch (err) {
         console.error("[AMI] Erro ao gerar PDF:", err);
         setStatus("Não foi possível gerar o PDF. " + (err?.message || ""), "error");
       } finally {
         if (reportEl) reportEl.remove();
+        $("loadingOverlay").classList.remove("show");
+        window.scrollTo(savedScrollX, savedScrollY);
         btn.disabled = false;
         btn.innerHTML = originalHTML;
       }
