@@ -60,7 +60,81 @@
     .skip-link:focus { top: 10px; }
     :focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; border-radius: 4px; }
 
+    /* ===== LOGIN ===== */
+    .login-screen {
+      position: fixed; inset: 0; z-index: 100;
+      background: linear-gradient(135deg, #14233b 0%, #0a1420 100%);
+      display: flex; align-items: center; justify-content: center; padding: 1.5rem;
+    }
+    html[data-theme="dark"] .login-screen {
+      background: linear-gradient(135deg, #0a1420 0%, #050a12 100%);
+    }
+    .login-screen.is-hidden { display: none; }
+    .login-card {
+      background: var(--card); border-radius: 22px;
+      padding: 2.4rem 2rem 1.8rem; width: 100%; max-width: 430px;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, .4); color: var(--ink);
+      animation: loginIn .35s ease;
+    }
+    @keyframes loginIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .login-brand { display: flex; align-items: center; gap: .8rem; margin-bottom: 1.4rem; }
+    .login-mark {
+      width: 2.8rem; height: 2.8rem; border-radius: .9rem;
+      display: grid; place-items: center;
+      background: linear-gradient(135deg, #6e8df1, #4366cb);
+      color: #fff; font-size: 1.4rem;
+      box-shadow: 0 4px 14px rgba(110, 141, 241, .35);
+    }
+    .login-title { font-weight: 800; font-size: 1.1rem; letter-spacing: .3px; }
+    .login-sub { font-size: .7rem; color: var(--muted); letter-spacing: 1.2px;
+      text-transform: uppercase; margin-top: .15rem; }
+    .login-heading { font-size: 1.4rem; font-weight: 800; margin: .5rem 0 .4rem; letter-spacing: -.4px; }
+    .login-hint { font-size: .82rem; color: var(--muted); margin-bottom: 1.4rem; line-height: 1.5; }
+    .login-label { display: block; font-size: .82rem; font-weight: 600;
+      color: var(--ink); margin: .8rem 0 .35rem; }
+    .login-input {
+      width: 100%; padding: .8rem .95rem;
+      border: 1px solid var(--line); border-radius: .7rem;
+      font-size: .95rem; background: var(--canvas); color: var(--ink);
+      font-family: inherit; transition: border-color .15s, box-shadow .15s;
+    }
+    .login-input:focus {
+      outline: 0; border-color: var(--blue);
+      box-shadow: 0 0 0 .2rem rgba(66, 100, 198, .18);
+    }
+    .login-btn {
+      width: 100%; margin-top: 1.3rem; padding: .9rem 1rem;
+      border: 0; border-radius: .75rem;
+      background: var(--navy); color: #fff;
+      font-size: .95rem; font-weight: 700; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
+      box-shadow: 0 6px 18px rgba(20, 35, 59, .25); transition: background .15s;
+    }
+    .login-btn:hover:not(:disabled) { background: #263e61; }
+    .login-btn:disabled { opacity: .6; cursor: wait; }
+    .login-error {
+      background: #ffefee; color: #a83b35; border: 1px solid #f4d4d1;
+      padding: .65rem .85rem; border-radius: .55rem;
+      font-size: .82rem; margin-top: 1rem;
+      display: flex; align-items: flex-start; gap: .5rem; line-height: 1.5;
+    }
+    html[data-theme="dark"] .login-error {
+      background: #3a1e1e; border-color: #5a2b2b; color: #ffb4ae;
+    }
+    .login-error[hidden] { display: none; }
+    .login-error i { margin-top: .15rem; flex-shrink: 0; }
+    .login-footer {
+      margin-top: 1.6rem; padding-top: 1rem;
+      border-top: 1px solid var(--line);
+      text-align: center; font-size: .72rem; color: var(--muted);
+    }
+
+    /* ===== DASHBOARD ===== */
     .app-shell { min-height: 100vh; display: flex; }
+    .app-shell.is-hidden { display: none; }
 
     .sidebar {
       width: 280px; min-height: 100vh;
@@ -68,6 +142,7 @@
       color: #fff; padding: 1.5rem 1.1rem;
       position: fixed; inset: 0 auto 0 0; z-index: 20;
       display: flex; flex-direction: column; overflow-y: auto;
+      transition: transform .3s cubic-bezier(.2, .8, .2, 1);
     }
     .brand { display:flex; align-items:center; gap:.8rem; padding: .2rem .3rem 1.4rem;
       border-bottom:1px solid rgba(255,255,255,.12); }
@@ -85,15 +160,34 @@
     }
     .sidebar .form-select:focus { border-color: #8199ef; box-shadow: 0 0 0 .2rem rgba(110,141,241,.2); }
     .sidebar .form-select option { color: #202c3d; background: #fff; }
+    .sidebar .form-select:disabled {
+      background-color: #17283f; color: #7a8aa3; cursor: not-allowed;
+    }
     .filter-block { margin-bottom: 1.1rem; }
     .side-note { margin-top: 1.2rem; padding: .8rem; background: rgba(255,255,255,.06);
       border: 1px solid rgba(255,255,255,.1); border-radius: .75rem;
       color: #bdc9da; font-size: .78rem; line-height: 1.55; }
     .sidebar-bottom { margin-top: auto; color: #8fa1bb; font-size: .72rem; padding: 1.1rem .2rem 0; }
 
-    .main { margin-left: 280px; padding: 2rem 2.2rem 1.4rem; width: calc(100% - 280px); }
+    .main {
+      margin-left: 280px; padding: 2rem 2.2rem 1.4rem; width: calc(100% - 280px);
+      transition: margin-left .3s cubic-bezier(.2, .8, .2, 1), width .3s cubic-bezier(.2, .8, .2, 1);
+    }
     .topline { display: flex; align-items: flex-start; justify-content: space-between;
       gap: 1rem; flex-wrap: wrap; margin-bottom: 1.6rem; }
+    .title-block { display: flex; align-items: flex-start; gap: .8rem; min-width: 0; }
+    .hamburger {
+      width: 2.6rem; height: 2.6rem;
+      display: inline-grid; place-items: center;
+      background: var(--card); border: 1px solid var(--line);
+      border-radius: .7rem; color: var(--ink);
+      cursor: pointer; font-size: 1.2rem; flex-shrink: 0;
+      transition: background .15s, transform .15s;
+      margin-top: .15rem;
+    }
+    .hamburger:hover { background: var(--canvas); }
+    .hamburger:active { transform: scale(.95); }
+
     .eyebrow { font-size: .72rem; color: var(--blue); letter-spacing: 1.3px;
       font-weight: 800; text-transform: uppercase; }
     h1 { font-size: 1.7rem; font-weight: 800; letter-spacing: -.8px; margin: .3rem 0 .25rem; }
@@ -126,6 +220,34 @@
       box-shadow: 0 5px 14px rgba(20,35,59,.18);
     }
     .btn-soft.primary:hover { background: #263e61; }
+    .btn-soft.pdf {
+      background: linear-gradient(135deg, #c0392b, #a93226);
+      color: #fff; border-color: #a93226;
+      box-shadow: 0 5px 14px rgba(192, 57, 43, .22);
+    }
+    .btn-soft.pdf:hover { background: linear-gradient(135deg, #a93226, #922b21); }
+    .btn-soft.pdf:disabled { opacity: .65; cursor: wait; }
+
+    .user-chip {
+      display: inline-flex; align-items: center; gap: .45rem;
+      background: var(--card); border: 1px solid var(--line);
+      padding: .55rem .85rem; border-radius: .7rem;
+      font-size: .82rem; font-weight: 600; color: var(--ink);
+      max-width: 240px;
+    }
+    .user-chip[hidden] { display: none; }
+    .user-chip i { color: var(--blue); font-size: 1rem; flex-shrink: 0; }
+    .user-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .user-chip.master {
+      background: linear-gradient(135deg, #fff7e0, #ffe9a8);
+      border-color: #f0d78a; color: #7a5a00;
+    }
+    html[data-theme="dark"] .user-chip.master {
+      background: linear-gradient(135deg, #3d3210, #4a3d12);
+      border-color: #6b5a1e; color: #ffd966;
+    }
+    .user-chip.master i { color: #b8860b; }
+    html[data-theme="dark"] .user-chip.master i { color: #ffd966; }
 
     .context-bar {
       background: #eaf0ff; border: 1px solid #dce6ff; color: #435a94;
@@ -137,7 +259,6 @@
     .section-heading { font-size: 1rem; font-weight: 800; margin: 0; }
     .section-caption { color: var(--muted); font-size: .78rem; margin-top: .2rem; }
 
-    /* ===== KPIs ===== */
     .kpi-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr));
       gap: .9rem; margin: 1rem 0 1.4rem; }
     .kpi-card, .chart-card, .table-card {
@@ -153,7 +274,6 @@
       border-radius: .75rem; font-size: 1.15rem; }
     .kpi-value { font-size: 2.15rem; font-weight: 800; letter-spacing: -1px;
       margin-top: 1rem; line-height: 1; }
-    /* Percentual destacado */
     .kpi-pct {
       display: flex; align-items: baseline; gap: .4rem;
       font-size: 1.55rem; font-weight: 800; letter-spacing: -.5px;
@@ -169,7 +289,6 @@
       right:-1.8rem; bottom:-2.2rem; background: var(--tint);
     }
 
-    /* ===== Charts ===== */
     .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.4rem; }
     .chart-card { padding: 1.2rem 1.2rem .9rem; min-width: 0; }
     .chart-header { display:flex; justify-content:space-between; align-items:flex-start; gap:.8rem; }
@@ -186,7 +305,6 @@
     .chart-wrap { position: relative; height: 320px; }
     #percentChartWrap { min-height: 340px; }
 
-    /* ===== Table ===== */
     .table-card { padding: 1.2rem; }
     .table-responsive { margin-top: .9rem; }
     .table { --bs-table-bg: transparent; margin-bottom: 0; font-size: .88rem; color: var(--ink); }
@@ -204,7 +322,6 @@
     .table .num { font-variant-numeric: tabular-nums; text-align: right; }
     .empty-state { padding: 3.5rem 1rem; text-align:center; color: var(--muted); font-size: .95rem; }
 
-    /* ===== Footer ===== */
     .footer {
       display: flex; justify-content: space-between; gap: 1rem;
       flex-wrap: wrap; padding: 1.5rem .2rem .2rem;
@@ -223,7 +340,19 @@
     #loadingOverlay.show { display:flex; }
     .loading-box { background: var(--card); padding: 1.4rem 1.8rem;
       border-radius: 1rem; box-shadow: var(--shadow);
-      font-size: .95rem; font-weight: 700; color: var(--ink); }
+      font-size: .95rem; font-weight: 700; color: var(--ink); max-width: 90vw; text-align: center; }
+
+    .sidebar-backdrop {
+      position: fixed; inset: 0; z-index: 30;
+      background: rgba(0,0,0,.45);
+      opacity: 0; pointer-events: none;
+      transition: opacity .28s ease;
+    }
+
+    @media (min-width: 761px) {
+      .app-shell.sidebar-collapsed .sidebar { transform: translateX(-100%); }
+      .app-shell.sidebar-collapsed .main { margin-left: 0; width: 100%; }
+    }
 
     @media (max-width: 1200px) {
       .sidebar { width: 250px; }
@@ -231,15 +360,25 @@
       .kpi-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
       .charts-grid { grid-template-columns: 1fr; }
     }
+
     @media (max-width: 760px) {
       .app-shell { flex-direction: column; }
-      .sidebar { position: relative; width: 100%; min-height: 0; padding: 1rem; }
+      .sidebar {
+        position: fixed; top: 0; left: 0; width: 280px; height: 100vh;
+        transform: translateX(-100%);
+        transition: transform .3s cubic-bezier(.2, .8, .2, 1);
+        z-index: 40; box-shadow: 4px 0 24px rgba(0,0,0,.3);
+        overflow-y: auto; padding: 1rem; inset: 0 auto 0 0;
+      }
+      .app-shell:not(.sidebar-collapsed) .sidebar { transform: translateX(0); }
+      .app-shell:not(.sidebar-collapsed) .sidebar-backdrop {
+        opacity: 1; pointer-events: auto;
+      }
+      .app-shell .main { margin-left: 0; width: 100%; padding: 1.2rem .9rem; }
       .brand { padding-bottom: .8rem; }
-      .sidebar-bottom { display: none; }
       .sidebar .filter-row { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
       .filter-block { margin: 0; }
       .side-note { margin-top: .8rem; }
-      .main { margin: 0; width: 100%; padding: 1.2rem .9rem; }
       h1 { font-size: 1.35rem; }
       .kpi-grid { gap: .6rem; }
       .kpi-card { padding: .9rem; }
@@ -247,19 +386,55 @@
       .kpi-pct { font-size: 1.25rem; }
       .chart-card, .table-card { padding: 1rem; }
       .chart-wrap { height: 280px; }
+      .user-chip { max-width: 160px; font-size: .78rem; }
     }
+
     @media (max-width: 420px) {
       .sidebar .filter-row { grid-template-columns: 1fr; }
       .a11y-group { width: 100%; justify-content: space-between; }
       .top-actions > button { flex: 1; justify-content: center; }
+      .hamburger { width: 2.4rem; height: 2.4rem; }
     }
   </style>
 </head>
 <body>
   <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
 
-  <div class="app-shell">
-    <aside class="sidebar" role="complementary" aria-label="Filtros de análise">
+  <!-- LOGIN -->
+  <div class="login-screen" id="loginScreen">
+    <form class="login-card" id="loginForm" autocomplete="on" novalidate>
+      <div class="login-brand">
+        <div class="login-mark" aria-hidden="true"><i class="bi bi-bar-chart-line-fill"></i></div>
+        <div>
+          <div class="login-title">AMI <span style="color:#4366cb">DASHBOARD</span></div>
+          <div class="login-sub">Acesso restrito</div>
+        </div>
+      </div>
+
+      <h2 class="login-heading">Entrar no painel</h2>
+      <p class="login-hint">Use o INEP cadastrado na sua escola ou as credenciais de administrador.</p>
+
+      <label class="login-label" for="loginUser">Usuário / INEP</label>
+      <input class="login-input" id="loginUser" type="text" autocomplete="username"
+             autofocus required placeholder="Ex.: 12345678">
+
+      <label class="login-label" for="loginPass">Senha</label>
+      <input class="login-input" id="loginPass" type="password" autocomplete="current-password"
+             placeholder="Deixe em branco se não houver senha">
+
+      <div class="login-error" id="loginError" role="alert" hidden></div>
+
+      <button class="login-btn" type="submit" id="loginBtn">Entrar</button>
+
+      <div class="login-footer">
+        © <span id="loginYear"></span> Todos os direitos reservados · Uso institucional
+      </div>
+    </form>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="app-shell is-hidden" id="appShell">
+    <aside class="sidebar" id="sidebar" role="complementary" aria-label="Filtros de análise">
       <div class="brand">
         <div class="brand-mark" aria-hidden="true"><i class="bi bi-bar-chart-line-fill"></i></div>
         <div>
@@ -279,26 +454,44 @@
           <select class="form-select" id="classFilter" disabled><option value="">Todas as turmas</option></select>
         </div>
       </div>
-      <div class="side-note"><i class="bi bi-info-circle me-1"></i> Os filtros são integrados. Ao selecionar uma escola, a lista de turmas é atualizada e todos os indicadores e gráficos são recalculados.</div>
+      <div class="side-note" id="sideNote">
+        <i class="bi bi-info-circle me-1"></i> Os filtros são integrados. Ao selecionar uma escola, a lista de turmas é atualizada e todos os indicadores e gráficos são recalculados.
+      </div>
       <div class="sidebar-bottom"><i class="bi bi-shield-check me-1"></i> Análise local dos dados no navegador</div>
     </aside>
 
+    <div class="sidebar-backdrop" id="sidebarBackdrop" aria-hidden="true"></div>
+
     <main class="main" id="main-content" role="main">
       <header class="topline">
-        <div>
-          <div class="eyebrow">Painel de indicadores educacionais</div>
-          <h1>Avaliação da Aprendizagem</h1>
-          <div class="subtitle">Acompanhamento dos níveis de desempenho por escola e turma.</div>
+        <div class="title-block">
+          <button class="hamburger" id="sidebarToggle" type="button"
+                  aria-label="Recolher painel lateral" aria-expanded="true" aria-controls="sidebar">
+            <i class="bi bi-list" aria-hidden="true"></i>
+          </button>
+          <div>
+            <div class="eyebrow">Painel de indicadores educacionais</div>
+            <h1>Avaliação da Aprendizagem</h1>
+            <div class="subtitle">Acompanhamento dos níveis de desempenho por escola e turma.</div>
+          </div>
         </div>
         <div class="top-actions">
+          <div class="user-chip" id="userChip" hidden>
+            <i class="bi bi-person-circle" aria-hidden="true"></i>
+            <span id="userName">—</span>
+          </div>
           <div class="a11y-group" role="group" aria-label="Ferramentas de acessibilidade">
             <button class="btn-icon" id="fontMinus" aria-label="Diminuir tamanho da fonte" title="Diminuir fonte">A−</button>
             <button class="btn-icon" id="fontPlus" aria-label="Aumentar tamanho da fonte" title="Aumentar fonte">A+</button>
             <button class="btn-icon" id="dyslexiaToggle" aria-label="Ativar modo dislexia" aria-pressed="false" title="Modo dislexia"><i class="bi bi-book" aria-hidden="true"></i></button>
             <button class="btn-icon" id="themeToggle" aria-label="Ativar modo escuro" aria-pressed="false" title="Alternar tema"><i class="bi bi-moon-stars-fill" id="themeIcon" aria-hidden="true"></i></button>
           </div>
+          <button class="btn-soft pdf" id="exportPdf" title="Gerar relatório em PDF com os filtros atuais">
+            <i class="bi bi-file-earmark-pdf me-1" aria-hidden="true"></i> Gerar PDF
+          </button>
           <button class="btn-soft primary" id="reloadBtn"><i class="bi bi-arrow-clockwise me-1" aria-hidden="true"></i> Recarregar</button>
           <button class="btn-soft" id="resetFilters"><i class="bi bi-arrow-counterclockwise me-1" aria-hidden="true"></i> Limpar</button>
+          <button class="btn-soft" id="logoutBtn" title="Encerrar sessão"><i class="bi bi-box-arrow-right me-1" aria-hidden="true"></i> Sair</button>
         </div>
       </header>
 
@@ -424,7 +617,7 @@
       <footer class="footer" role="contentinfo">
         <div>
           <strong>AMI · Painel de Monitoramento da Aprendizagem</strong>
-          <span class="copy">© <span id="currentYear">2025</span> Todos os direitos reservados · Diretoria de Avaliação e Monitormento (SME/DAM)</span>
+          <span class="copy">© <span id="currentYear">2025</span> Todos os direitos reservados · Diretoria de Avaliação e Monitoramento (SME/DAM)</span>
         </div>
         <span id="lastUpdate">Atualização automática conforme os filtros</span>
       </footer>
@@ -432,7 +625,7 @@
   </div>
 
   <div id="loadingOverlay" role="status" aria-live="polite">
-    <div class="loading-box"><span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span> Processando planilha...</div>
+    <div class="loading-box"><span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span> Processando...</div>
   </div>
 
   <div vw class="enabled">
@@ -443,10 +636,10 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
 
   <script>
-    /* Registro explícito do plugin de rótulos (corrige "labels não aparecem") */
     (function registerDatalabels() {
       try {
         if (window.Chart && window.ChartDataLabels) {
@@ -460,22 +653,49 @@
       }
     })();
     if (window.VLibras) new window.VLibras.Widget('https://vlibras.gov.br/app');
+    if (location.protocol === "file:") {
+      console.warn("[AMI] Você está usando file://. Navegadores bloqueiam fetch/XHR de arquivos locais. Use um servidor HTTP local (ex.: 'python -m http.server').");
+    }
   </script>
 
   <script>
   (() => {
     "use strict";
 
-    const FILE_NAME = "bd_ami.xlsx";
+    /* ============================================================
+       CONSTANTES
+       ============================================================ */
+    const FILE_NAME  = "bd_ami.xlsx";
+    const LOGIN_FILE = "senhas.xlsx";
+    const MASTER_USER = "admin";
+    const MASTER_PASS = "@admin";
     const COLORS = ["#d93b3b", "#e0ab1f", "#7fc79b", "#0f5e3c"];
     const DL_TEXT = ["#ffffff", "#2a2a2a", "#0a2e1e", "#ffffff"];
     const LABELS = ["Abaixo do crítico", "Crítico", "Intermediário", "Desejável"];
     const FIELDS = ["ABAIXO_CRITICO", "CRITICO", "INTERMEDIARIO", "DESEJAVEL"];
+    const FIELD_ALIASES = {
+      LOCAL:          ["LOCAL", "CRECHE", "ESCOLA", "UNIDADE", "SETOR", "ESTABELECIMENTO", "NOME"],
+      TURMA:          ["TURMA", "CLASSE", "GRUPO", "SALA"],
+      ABAIXO_CRITICO: ["ABAIXO_CRITICO", "ABAIXO_DO_CRITICO"],
+      CRITICO:        ["CRITICO"],
+      INTERMEDIARIO:  ["INTERMEDIARIO"],
+      DESEJAVEL:      ["DESEJAVEL"]
+    };
+    const SESSION_KEY = "ami-session";
+    const SIDEBAR_KEY = "ami-sidebar-collapsed";
 
+    /* ============================================================
+       ESTADO
+       ============================================================ */
     let records = [], filteredRecords = [];
     let countChart = null, percentChart = null;
     let currentFileName = FILE_NAME;
+    let session = null;
+    let loginUsers = [];
 
+    /* ============================================================
+       HELPERS
+       ============================================================ */
     const $ = id => document.getElementById(id);
     const fmt = n => Number(n || 0).toLocaleString("pt-BR", { maximumFractionDigits: 0 });
     const pct = (n, total) => total
@@ -483,7 +703,11 @@
       : "0,0%";
     const cleanText = v => String(v ?? "").replace(/\s+/g, " ").trim();
     const normalizeHeader = s => String(s ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-      .trim().toUpperCase().replace(/\s+/g, "_").replace(/%/g, "");
+      .trim().toUpperCase()
+      .replace(/\s+/g, "_")
+      .replace(/%/g, "PCT")
+      .replace(/_+/g, "_")
+      .replace(/^_|_$/g, "");
 
     const rootFS = () => {
       const v = parseFloat(getComputedStyle(document.documentElement).fontSize);
@@ -515,6 +739,12 @@
       return Number.isFinite(n) ? n : 0;
     }
 
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, c => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      })[c]);
+    }
+
     function setStatus(message, type = "info") {
       const el = $("dataStatus");
       const icon = type === "success" ? "bi-check-circle-fill"
@@ -536,10 +766,189 @@
       }
     }
 
-    function escapeHtml(value) {
-      return String(value ?? "").replace(/[&<>"']/g, c => ({
-        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-      })[c]);
+    /* ============================================================
+       FETCH ROBUSTO
+       ============================================================ */
+    function xhrGetArrayBuffer(url) {
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", url, true);
+        xhr.responseType = "arraybuffer";
+        xhr.onload = () => {
+          if (xhr.status === 0 || (xhr.status >= 200 && xhr.status < 300)) {
+            resolve(xhr.response);
+          } else {
+            reject(new Error(`HTTP ${xhr.status} - ${xhr.statusText || "erro"}`));
+          }
+        };
+        xhr.onerror = () => reject(new Error("Erro de rede ao acessar " + url));
+        xhr.ontimeout = () => reject(new Error("Timeout ao acessar " + url));
+        xhr.timeout = 30000;
+        xhr.send();
+      });
+    }
+
+    async function fetchArrayBuffer(url) {
+      let fetchError = null;
+      try {
+        const res = await fetch(url, { cache: "no-store" });
+        if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText || "erro"}`);
+        return await res.arrayBuffer();
+      } catch (err) {
+        fetchError = err;
+        console.warn(`[AMI] fetch falhou para ${url}:`, err.message);
+      }
+      try {
+        const buf = await xhrGetArrayBuffer(url);
+        console.log(`[AMI] XHR resolveu ${url} (fallback).`);
+        return buf;
+      } catch (xhrErr) {
+        console.warn(`[AMI] XHR também falhou para ${url}:`, xhrErr.message);
+        throw fetchError || xhrErr;
+      }
+    }
+
+    function explainLoadError(err, fileName) {
+      const isFile = location.protocol === "file:";
+      const reason = err?.message || String(err);
+      let hint = "";
+
+      if (isFile) {
+        hint = "Você está abrindo o HTML diretamente (protocolo file://). " +
+               "Navegadores modernos bloqueiam por segurança o carregamento de arquivos locais via JavaScript. " +
+               "SOLUÇÕES: (1) Com Python, abra o terminal na pasta do projeto e execute " +
+               "'python -m http.server 8000', depois acesse http://localhost:8000. " +
+               "(2) Ou instale a extensão 'Live Server' no VS Code e clique em 'Go Live'. " +
+               "(3) Ou use o Firefox, que permite XHR local em algumas versões.";
+      } else if (/404|not found/i.test(reason)) {
+        hint = `O arquivo '${fileName}' não foi encontrado no servidor. ` +
+               `Confira se ele está na mesma pasta do HTML e se o nome está EXATAMENTE igual (maiúsculas/minúsculas importam).`;
+      } else if (/cors/i.test(reason)) {
+        hint = "Erro de CORS. Use um servidor local em vez de abrir o arquivo diretamente.";
+      } else if (/network|failed|timeout/i.test(reason)) {
+        hint = "Erro de rede. Verifique se o servidor local está ativo e se o arquivo existe.";
+      } else {
+        hint = `Verifique se '${fileName}' existe na mesma pasta do HTML e não está corrompido.`;
+      }
+      return `Não foi possível carregar ${fileName}. Motivo: ${reason}. ${hint}`;
+    }
+
+    /* ============================================================
+       LOGIN
+       ============================================================ */
+    async function loadLoginSheet() {
+      try {
+        const buf = await fetchArrayBuffer(LOGIN_FILE);
+        const wb = XLSX.read(buf, { type: "array" });
+        const sh = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(sh, { defval: "" });
+        loginUsers = rows.map(r => {
+          const o = {};
+          Object.entries(r).forEach(([k, v]) => o[normalizeHeader(k)] = v);
+          return {
+            INEP: cleanText(o.INEP),
+            ESCOLA: cleanText(o.ESCOLA),
+            SENHA: cleanText(o.SENHA)
+          };
+        }).filter(u => u.INEP);
+        console.log(`[AMI] ${LOGIN_FILE} carregado: ${loginUsers.length} usuário(s).`);
+        return true;
+      } catch (err) {
+        console.error(`[AMI] Falha ao carregar ${LOGIN_FILE}:`, err);
+        return false;
+      }
+    }
+
+    function tryLogin(userInput, passInput) {
+      const user = cleanText(userInput);
+      const pass = String(passInput ?? "");
+
+      if (user.toLowerCase() === MASTER_USER.toLowerCase() && pass === MASTER_PASS) {
+        return { ok: true, session: { role: "master", inep: MASTER_USER, escola: null } };
+      }
+
+      const u = loginUsers.find(x => x.INEP.toLowerCase() === user.toLowerCase());
+      if (!u) return { ok: false, msg: "Usuário/INEP não encontrado na base de acesso." };
+      if (!u.ESCOLA) return { ok: false, msg: "Usuário sem escola associada. Contate o administrador." };
+      if ((u.SENHA || "") !== pass) return { ok: false, msg: "Senha incorreta." };
+
+      return { ok: true, session: { role: "school", inep: u.INEP, escola: u.ESCOLA } };
+    }
+
+    async function handleLoginSubmit(e) {
+      e.preventDefault();
+      const btn = $("loginBtn");
+      const errEl = $("loginError");
+      errEl.hidden = true;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Validando...';
+
+      try {
+        if (!loginUsers.length) {
+          const ok = await loadLoginSheet();
+          if (!ok) {
+            errEl.innerHTML = `<i class="bi bi-x-circle" aria-hidden="true"></i><span>Não foi possível carregar <strong>${LOGIN_FILE}</strong>. ${explainLoadError(new Error("arquivo não carregado"), LOGIN_FILE)}</span>`;
+            errEl.hidden = false;
+            return;
+          }
+        }
+
+        const result = tryLogin($("loginUser").value, $("loginPass").value);
+        if (!result.ok) {
+          errEl.innerHTML = `<i class="bi bi-x-circle" aria-hidden="true"></i><span>${escapeHtml(result.msg)}</span>`;
+          errEl.hidden = false;
+          $("loginPass").select();
+          return;
+        }
+
+        session = result.session;
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+        await enterDashboard();
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = "Entrar";
+      }
+    }
+
+    async function enterDashboard() {
+      $("loginScreen").classList.add("is-hidden");
+      $("appShell").classList.remove("is-hidden");
+
+      const chip = $("userChip");
+      chip.hidden = false;
+      if (session.role === "master") {
+        $("userName").textContent = "Administrador";
+        chip.classList.add("master");
+        chip.title = "Sessão de administrador · acesso a todas as escolas";
+        $("sideNote").innerHTML = '<i class="bi bi-shield-lock me-1"></i> Modo administrador: todos os filtros estão liberados.';
+      } else {
+        $("userName").textContent = session.escola || session.inep;
+        chip.classList.remove("master");
+        chip.title = `INEP: ${session.inep} · ${session.escola}`;
+        $("sideNote").innerHTML = '<i class="bi bi-lock me-1"></i> Acesso restrito à sua escola. O filtro de escola está bloqueado e a lista de turmas mostra apenas as suas.';
+      }
+
+      initSidebar();
+      await loadWorkbookFromSameFolder();
+    }
+
+    function logout() {
+      sessionStorage.removeItem(SESSION_KEY);
+      session = null;
+      location.reload();
+    }
+
+    /* ============================================================
+       DADOS
+       ============================================================ */
+    function pickField(obj, aliases) {
+      for (const key of aliases) {
+        if (Object.prototype.hasOwnProperty.call(obj, key) &&
+            obj[key] !== "" && obj[key] !== null && obj[key] !== undefined) {
+          return obj[key];
+        }
+      }
+      return "";
     }
 
     function normalizeRows(jsonRows) {
@@ -549,14 +958,31 @@
         Object.entries(raw).forEach(([key, value]) => obj[normalizeHeader(key)] = value);
         return obj;
       });
-      const required = ["LOCAL", "TURMA", ...FIELDS];
-      const headers = Object.keys(mapped[0]);
-      const missing = required.filter(field => !headers.includes(field));
-      if (missing.length) throw new Error("Colunas obrigatórias ausentes: " + missing.join(", "));
+
+      const firstObj = mapped[0];
+      const detected = Object.keys(firstObj);
+      const missing = [];
+      for (const [field, aliases] of Object.entries(FIELD_ALIASES)) {
+        const found = aliases.find(a => Object.prototype.hasOwnProperty.call(firstObj, a));
+        if (!found) {
+          missing.push(`${field} (aceito como: ${aliases.join(" | ")})`);
+        }
+      }
+      if (missing.length) {
+        throw new Error(
+          "Colunas obrigatórias ausentes: " + missing.join("; ") +
+          ". Colunas detectadas na planilha: " + detected.join(", ") + "."
+        );
+      }
 
       const normalized = mapped.map((r, index) => {
-        const item = { LOCAL: cleanText(r.LOCAL), TURMA: cleanText(r.TURMA) };
-        FIELDS.forEach(field => item[field] = parseNumber(r[field]));
+        const item = {
+          LOCAL: cleanText(pickField(r, FIELD_ALIASES.LOCAL)),
+          TURMA: cleanText(pickField(r, FIELD_ALIASES.TURMA))
+        };
+        FIELDS.forEach(field => {
+          item[field] = parseNumber(pickField(r, FIELD_ALIASES[field]));
+        });
         if (!item.LOCAL || !item.TURMA) return null;
         if (FIELDS.some(field => item[field] < 0))
           throw new Error(`Valor negativo encontrado na linha ${index + 2}.`);
@@ -567,14 +993,43 @@
       return normalized;
     }
 
+    function recordBelongsToSession(row) {
+      if (!session) return true;
+      if (session.role === "master") return true;
+      return row.LOCAL.toLowerCase() === session.escola.toLowerCase();
+    }
+
     function populateSchools() {
       const schoolSelect = $("schoolFilter");
       const previous = schoolSelect.value;
-      schoolSelect.innerHTML = '<option value="">Todas as escolas</option>';
-      [...new Set(records.map(r => r.LOCAL))]
-        .sort((a, b) => a.localeCompare(b, "pt-BR"))
-        .forEach(name => schoolSelect.add(new Option(name, name)));
-      if ([...schoolSelect.options].some(o => o.value === previous)) schoolSelect.value = previous;
+
+      let schools;
+      if (session && session.role === "school") {
+        const real = records.map(r => r.LOCAL)
+          .find(l => l.toLowerCase() === session.escola.toLowerCase());
+        schools = real ? [real] : [session.escola];
+      } else {
+        schools = [...new Set(records.map(r => r.LOCAL))]
+          .sort((a, b) => a.localeCompare(b, "pt-BR"));
+      }
+
+      schoolSelect.innerHTML = "";
+      if (!session || session.role === "master") {
+        schoolSelect.add(new Option("Todas as escolas", ""));
+      }
+      schools.forEach(name => schoolSelect.add(new Option(name, name)));
+
+      if (session && session.role === "school") {
+        schoolSelect.value = schools[0];
+        schoolSelect.disabled = true;
+        schoolSelect.setAttribute("aria-disabled", "true");
+      } else {
+        schoolSelect.disabled = false;
+        schoolSelect.removeAttribute("aria-disabled");
+        if ([...schoolSelect.options].some(o => o.value === previous)) {
+          schoolSelect.value = previous;
+        }
+      }
       populateClasses();
     }
 
@@ -584,7 +1039,10 @@
       const previous = classSelect.value;
       classSelect.innerHTML = '<option value="">Todas as turmas</option>';
       const classes = [...new Set(
-        records.filter(r => !selectedSchool || r.LOCAL === selectedSchool).map(r => r.TURMA)
+        records.filter(r => {
+          if (selectedSchool) return r.LOCAL === selectedSchool;
+          return recordBelongsToSession(r);
+        }).map(r => r.TURMA)
       )].sort((a, b) => a.localeCompare(b, "pt-BR"));
       classes.forEach(name => classSelect.add(new Option(name, name)));
       classSelect.disabled = !selectedSchool;
@@ -606,6 +1064,9 @@
       return [...groups.entries()].sort((a, b) => a[0].localeCompare(b[0], "pt-BR"));
     }
 
+    /* ============================================================
+       GRÁFICOS
+       ============================================================ */
     function chartOptions({ horizontal = false, stacked = false, percent = false } = {}) {
       const t = getChartTheme();
       const valueAxis = {
@@ -619,8 +1080,7 @@
         border: { display: false }
       };
       const categoryAxis = {
-        stacked,
-        grid: { display: false },
+        stacked, grid: { display: false },
         ticks: {
           color: t.category, padding: 8,
           font: { size: chartFS(13), family: chartFontFamily(), weight: "600" },
@@ -629,8 +1089,7 @@
         border: { display: false }
       };
       return {
-        responsive: true,
-        maintainAspectRatio: false,
+        responsive: true, maintainAspectRatio: false,
         indexAxis: horizontal ? "y" : "x",
         interaction: { mode: "index", intersect: false },
         layout: { padding: { top: horizontal ? 8 : 30, right: 16, left: 8, bottom: 4 } },
@@ -657,27 +1116,19 @@
       const labels = groups.map(([name]) => name);
       const t = getChartTheme();
 
-      // ===== Gráfico 1: Contagem (vertical agrupado) com rótulos no topo =====
       const countDatasets = FIELDS.map((field, i) => ({
         label: LABELS[i],
         data: groups.map(([, values]) => values[i]),
         backgroundColor: COLORS[i],
-        borderRadius: 6,
-        borderSkipped: false,
-        maxBarThickness: 52,
+        borderRadius: 6, borderSkipped: false, maxBarThickness: 52,
         datalabels: {
-          display: true,
-          anchor: "end",
-          align: "top",
-          offset: 6,
-          clamp: true,
+          display: true, anchor: "end", align: "top", offset: 6, clamp: true,
           color: t.labelLight,
           font: { size: chartFS(14), weight: 700, family: chartFontFamily() },
           formatter: v => (v != null && v > 0) ? fmt(v) : ""
         }
       }));
 
-      // ===== Gráfico 2: Percentual horizontal 100% empilhado, rótulos dentro =====
       const percentDatasets = FIELDS.map((field, i) => ({
         label: LABELS[i],
         data: groups.map(([, values]) => {
@@ -685,18 +1136,12 @@
           return total ? values[i] / total * 100 : 0;
         }),
         backgroundColor: COLORS[i],
-        borderRadius: 3,
-        borderSkipped: false,
-        maxBarThickness: 42,
+        borderRadius: 3, borderSkipped: false, maxBarThickness: 42,
         datalabels: {
-          display: true,
-          anchor: "center",
-          align: "center",
+          display: true, anchor: "center", align: "center",
           color: DL_TEXT[i],
           font: { size: chartFS(13), weight: 800, family: chartFontFamily() },
-          formatter: v => (v != null && v >= 5)
-            ? v.toFixed(1).replace(".", ",") + "%"
-            : ""
+          formatter: v => (v != null && v >= 5) ? v.toFixed(1).replace(".", ",") + "%" : ""
         }
       }));
 
@@ -704,14 +1149,12 @@
       if (percentChart) { percentChart.destroy(); percentChart = null; }
 
       countChart = new Chart($("countChart"), {
-        type: "bar",
-        data: { labels, datasets: countDatasets },
+        type: "bar", data: { labels, datasets: countDatasets },
         options: chartOptions({ horizontal: false, stacked: false, percent: false })
       });
 
       percentChart = new Chart($("percentChart"), {
-        type: "bar",
-        data: { labels, datasets: percentDatasets },
+        type: "bar", data: { labels, datasets: percentDatasets },
         options: chartOptions({ horizontal: true, stacked: true, percent: true })
       });
 
@@ -741,22 +1184,23 @@
       if (!records.length) return;
       const school = $("schoolFilter").value;
       const turma = $("classFilter").value;
-      filteredRecords = records.filter(row =>
-        (!school || row.LOCAL === school) && (!turma || row.TURMA === turma)
-      );
+
+      filteredRecords = records.filter(row => {
+        if (!recordBelongsToSession(row)) return false;
+        if (school && row.LOCAL !== school) return false;
+        if (turma && row.TURMA !== turma) return false;
+        return true;
+      });
 
       const { totals, total } = aggregate(filteredRecords);
       const schoolCount = new Set(filteredRecords.map(r => r.LOCAL)).size;
 
       $("kpiTotal").textContent = fmt(total);
       $("kpiSchools").innerHTML = `${schoolCount}<span>${schoolCount === 1 ? "escola" : "escolas"}</span>`;
-
       $("kpiBelow").textContent = fmt(totals[0]);
       $("kpiBelowPct").innerHTML = `${pct(totals[0], total)}<span>do total</span>`;
-
       $("kpiCritical").textContent = fmt(totals[1]);
       $("kpiCriticalPct").innerHTML = `${pct(totals[1], total)}<span>do total</span>`;
-
       $("kpiPositive").textContent = fmt(totals[2] + totals[3]);
       $("kpiPositivePct").innerHTML = `${pct(totals[2] + totals[3], total)}<span>do total</span>`;
 
@@ -774,34 +1218,58 @@
       $("lastUpdate").textContent = "Dados atualizados em " + new Date().toLocaleString("pt-BR");
     }
 
+    /* ============================================================
+       CARREGAMENTO DE DADOS
+       ============================================================ */
     async function loadWorkbookFromSameFolder() {
       $("loadingOverlay").classList.add("show");
       try {
-        const response = await fetch(FILE_NAME, { cache: "no-store" });
-        if (!response.ok) throw new Error(`Arquivo não encontrado (HTTP ${response.status}).`);
-        const buffer = await response.arrayBuffer();
+        const buffer = await fetchArrayBuffer(FILE_NAME);
         const workbook = XLSX.read(buffer, { type: "array" });
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         records = normalizeRows(XLSX.utils.sheet_to_json(sheet, { defval: "" }));
         currentFileName = FILE_NAME;
         populateSchools();
         render();
+
+        const roleInfo = session?.role === "master"
+          ? " · modo administrador"
+          : session?.role === "school"
+            ? ` · ${session.escola}`
+            : "";
         setStatus(
-          `Base carregada: ${currentFileName} · ${records.length} registros · ${new Set(records.map(r => r.LOCAL)).size} escolas.`,
+          `Base carregada: ${currentFileName} · ${records.length} registros · ${new Set(records.map(r => r.LOCAL)).size} escolas${roleInfo}.`,
           "success"
         );
+        console.log(`[AMI] ${FILE_NAME} carregado com sucesso: ${records.length} registros.`);
       } catch (error) {
-        setStatus(
-          `Não foi possível carregar ${FILE_NAME}. ${error.message} Verifique se o arquivo está na mesma pasta do HTML e recarregue a página.`,
-          "error"
-        );
-        $("dataTable").innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="bi bi-file-earmark-excel fs-2 d-block mb-2" aria-hidden="true"></i>Coloque <strong>bd_ami.xlsx</strong> na mesma pasta do HTML e clique em "Recarregar".</div></td></tr>';
+        const msg = explainLoadError(error, FILE_NAME);
+        setStatus(msg, "error");
+        console.error(`[AMI] Erro ao carregar ${FILE_NAME}:`, error);
+        $("dataTable").innerHTML = `
+          <tr><td colspan="7">
+            <div class="empty-state">
+              <i class="bi bi-file-earmark-excel fs-2 d-block mb-2" aria-hidden="true"></i>
+              <strong>Base não carregada.</strong><br>
+              <span style="font-size:.85rem;max-width:640px;display:inline-block;margin-top:.5rem;">
+                ${escapeHtml(msg)}
+              </span>
+              <div style="margin-top:1rem;">
+                <button class="btn-soft primary" onclick="document.getElementById('reloadBtn').click()">
+                  <i class="bi bi-arrow-clockwise me-1" aria-hidden="true"></i> Tentar novamente
+                </button>
+              </div>
+            </div>
+          </td></tr>`;
         $("recordCount").textContent = "Base não carregada";
       } finally {
         $("loadingOverlay").classList.remove("show");
       }
     }
 
+    /* ============================================================
+       PREFERÊNCIAS
+       ============================================================ */
     function applyTheme(theme) {
       document.documentElement.setAttribute("data-theme", theme);
       const pressed = theme === "dark";
@@ -835,22 +1303,409 @@
       applyFontSize(FS_STEPS[Math.max(0, Math.min(FS_STEPS.length - 1, i + dir))]);
     }
 
-    (function initPrefs() {
-      const savedTheme = localStorage.getItem("ami-theme");
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      applyTheme(savedTheme || (prefersDark ? "dark" : "light"));
-      applyDyslexia(localStorage.getItem("ami-dyslexia") === "1");
-      applyFontSize(localStorage.getItem("ami-fs") || "md");
-    })();
+    /* ============================================================
+       SIDEBAR
+       ============================================================ */
+    function initSidebar() {
+      const saved = localStorage.getItem(SIDEBAR_KEY);
+      const isMobile = window.matchMedia("(max-width: 760px)").matches;
+
+      if (saved === null) {
+        if (isMobile) $("appShell").classList.add("sidebar-collapsed");
+      } else if (saved === "1") {
+        $("appShell").classList.add("sidebar-collapsed");
+      }
+      updateHamburgerAria();
+    }
+
+    function toggleSidebar() {
+      const shell = $("appShell");
+      const collapsed = shell.classList.toggle("sidebar-collapsed");
+      localStorage.setItem(SIDEBAR_KEY, collapsed ? "1" : "0");
+      updateHamburgerAria();
+    }
+
+    function updateHamburgerAria() {
+      const collapsed = $("appShell").classList.contains("sidebar-collapsed");
+      const btn = $("sidebarToggle");
+      btn.setAttribute("aria-expanded", String(!collapsed));
+      btn.setAttribute("aria-label", collapsed ? "Abrir painel lateral" : "Recolher painel lateral");
+    }
+
+    /* ============================================================
+       RELATÓRIO PDF
+       ============================================================ */
+    function slugify(str) {
+      return String(str || "")
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-zA-Z0-9]+/g, "_")
+        .replace(/^_+|_+$/g, "")
+        .toLowerCase() || "escola";
+    }
+
+    function getReportSchoolName() {
+      if (session?.role === "school") return session.escola;
+      const sel = $("schoolFilter").value;
+      return sel || "Todas as escolas";
+    }
+
+    function getReportInep() {
+      if (session?.role === "school") return session.inep;
+      return "—";
+    }
+
+    function getReportClasses() {
+      const turmaSel = $("classFilter").value;
+      if (turmaSel) return turmaSel;
+
+      const sel = $("schoolFilter").value;
+      const pool = records.filter(r => {
+        if (!recordBelongsToSession(r)) return false;
+        if (sel && r.LOCAL !== sel) return false;
+        return true;
+      });
+      const classes = [...new Set(pool.map(r => r.TURMA))]
+        .sort((a, b) => a.localeCompare(b, "pt-BR"));
+      if (!classes.length) return "Todas as turmas";
+      if (classes.length > 8) {
+        return classes.slice(0, 8).join(", ") + ` … (+${classes.length - 8} turmas)`;
+      }
+      return classes.join(", ");
+    }
+
+    function buildReportElement() {
+      const escola = getReportSchoolName();
+      const inep = getReportInep();
+      const turmas = getReportClasses();
+      const { totals, total } = aggregate(filteredRecords);
+      const schoolCount = new Set(filteredRecords.map(r => r.LOCAL)).size;
+      const now = new Date().toLocaleString("pt-BR");
+      const roleLabel = session?.role === "master" ? "Administrador" : "Escola";
+
+      if (countChart) countChart.update("none");
+      if (percentChart) percentChart.update("none");
+
+      const countImg = countChart ? countChart.toBase64Image("image/png", 1) : "";
+      const percentImg = percentChart ? percentChart.toBase64Image("image/png", 1) : "";
+
+      const kpis = [
+        { label: "Total de estudantes", value: fmt(total),
+          pct: `${schoolCount} ${schoolCount === 1 ? "escola" : "escolas"}`,
+          color: "#4264c6" },
+        { label: "Abaixo do crítico", value: fmt(totals[0]),
+          pct: `${pct(totals[0], total)} do total`, color: "#d93b3b" },
+        { label: "Nível crítico", value: fmt(totals[1]),
+          pct: `${pct(totals[1], total)} do total`, color: "#9a7608" },
+        { label: "Intermediário + desejável", value: fmt(totals[2] + totals[3]),
+          pct: `${pct(totals[2] + totals[3], total)} do total`, color: "#0f5e3c" }
+      ];
+
+      const rows = filteredRecords.length
+        ? filteredRecords.map(r => {
+            const tot = FIELDS.reduce((s, f) => s + r[f], 0);
+            return `<tr>
+              <td class="rpt-td-school">${escapeHtml(r.LOCAL)}</td>
+              <td>${escapeHtml(r.TURMA)}</td>
+              <td class="rpt-td-num">${fmt(r.ABAIXO_CRITICO)}</td>
+              <td class="rpt-td-num">${fmt(r.CRITICO)}</td>
+              <td class="rpt-td-num">${fmt(r.INTERMEDIARIO)}</td>
+              <td class="rpt-td-num">${fmt(r.DESEJAVEL)}</td>
+              <td class="rpt-td-num rpt-td-total">${fmt(tot)}</td>
+            </tr>`;
+          }).join("")
+        : `<tr><td colspan="7" class="rpt-empty">Nenhum registro para os filtros selecionados.</td></tr>`;
+
+      const wrap = document.createElement("div");
+      wrap.id = "pdfReport";
+      wrap.style.cssText = `
+        position: fixed; left: -99999px; top: 0;
+        width: 750px; background: #ffffff; padding: 0;
+        box-sizing: border-box;
+        font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        color: #1a2433; font-size: 11px; line-height: 1.4;
+      `;
+
+      wrap.innerHTML = `
+        <style>
+          #pdfReport * { box-sizing: border-box; }
+          #pdfReport .rpt-header {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            padding-bottom: 14px; border-bottom: 3px solid #14233b; margin-bottom: 16px;
+          }
+          #pdfReport .rpt-brand { display: flex; align-items: center; gap: 10px; }
+          #pdfReport .rpt-mark {
+            width: 42px; height: 42px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #6e8df1, #4366cb);
+            color: #fff; font-size: 20px; font-weight: 800;
+          }
+          #pdfReport .rpt-brand-name { font-size: 15px; font-weight: 800; letter-spacing: -0.3px; }
+          #pdfReport .rpt-brand-sub {
+            font-size: 8px; color: #5a6779; letter-spacing: 1.2px;
+            text-transform: uppercase; margin-top: 2px;
+          }
+          #pdfReport .rpt-meta {
+            text-align: right; font-size: 9px; color: #5a6779; line-height: 1.6;
+          }
+          #pdfReport .rpt-meta strong { color: #1a2433; }
+          #pdfReport h1 {
+            font-size: 22px; font-weight: 800; letter-spacing: -0.6px;
+            margin: 0 0 4px 0; color: #14233b;
+          }
+          #pdfReport .rpt-sub { font-size: 11px; color: #5a6779; margin-bottom: 16px; }
+          #pdfReport .rpt-info-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 8px; margin-bottom: 20px;
+          }
+          #pdfReport .rpt-info-item {
+            background: #f4f7fb; border: 1px solid #e2e8f0;
+            padding: 10px 12px; border-radius: 8px;
+          }
+          #pdfReport .rpt-info-label {
+            font-size: 8px; color: #5a6779; text-transform: uppercase;
+            letter-spacing: 0.6px; font-weight: 700; margin-bottom: 3px;
+          }
+          #pdfReport .rpt-info-value {
+            font-size: 11px; font-weight: 700; color: #1a2433;
+            word-break: break-word; line-height: 1.3;
+          }
+          #pdfReport .rpt-section-title {
+            font-size: 14px; font-weight: 800; color: #14233b;
+            margin: 22px 0 10px 0; padding-bottom: 6px;
+            border-bottom: 1.5px solid #14233b;
+          }
+          #pdfReport .rpt-section-title:first-of-type { margin-top: 0; }
+          #pdfReport .rpt-kpi-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 8px; margin-bottom: 8px;
+          }
+          #pdfReport .rpt-kpi {
+            background: #ffffff; border: 1px solid #e2e8f0;
+            border-radius: 10px; padding: 12px 12px 14px;
+            position: relative; overflow: hidden;
+          }
+          #pdfReport .rpt-kpi-label {
+            font-size: 9px; color: #5a6779; font-weight: 600; margin-bottom: 8px;
+          }
+          #pdfReport .rpt-kpi-value {
+            font-size: 24px; font-weight: 800; letter-spacing: -0.8px;
+            line-height: 1; margin-bottom: 6px;
+          }
+          #pdfReport .rpt-kpi-pct {
+            font-size: 15px; font-weight: 800; letter-spacing: -0.3px;
+          }
+          #pdfReport .rpt-chart-block {
+            background: #ffffff; border: 1px solid #e2e8f0;
+            border-radius: 10px; padding: 12px; margin-bottom: 10px;
+          }
+          #pdfReport .rpt-chart-title {
+            font-size: 11px; font-weight: 800; margin: 0 0 8px 0; color: #1a2433;
+          }
+          #pdfReport .rpt-chart-block img {
+            width: 100%; height: auto; display: block;
+          }
+          #pdfReport .rpt-table {
+            width: 100%; border-collapse: collapse; font-size: 9.5px;
+            border: 1px solid #e2e8f0; overflow: hidden;
+          }
+          #pdfReport .rpt-table thead { background: #14233b; color: #ffffff; }
+          #pdfReport .rpt-table th {
+            padding: 8px 8px; text-align: left; font-size: 8.5px;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            font-weight: 700; white-space: nowrap;
+          }
+          #pdfReport .rpt-table th.rpt-td-num { text-align: right; }
+          #pdfReport .rpt-table td {
+            padding: 7px 8px; border-bottom: 1px solid #e2e8f0;
+            color: #1a2433; vertical-align: middle;
+          }
+          #pdfReport .rpt-table tbody tr:nth-child(even) { background: #f8fafc; }
+          #pdfReport .rpt-table tbody tr:last-child td { border-bottom: 0; }
+          #pdfReport .rpt-td-school { font-weight: 700; }
+          #pdfReport .rpt-td-num { text-align: right; font-variant-numeric: tabular-nums; }
+          #pdfReport .rpt-td-total { font-weight: 800; }
+          #pdfReport .rpt-empty {
+            text-align: center; color: #5a6779; padding: 20px !important;
+          }
+          #pdfReport .rpt-footer {
+            margin-top: 24px; padding-top: 10px; border-top: 1px solid #e2e8f0;
+            display: flex; justify-content: space-between;
+            font-size: 8.5px; color: #5a6779;
+          }
+          #pdfReport .page-break { page-break-before: always; }
+        </style>
+
+        <div class="rpt-header">
+          <div class="rpt-brand">
+            <div class="rpt-mark">&#128202;</div>
+            <div>
+              <div class="rpt-brand-name">AMI · Painel de Monitoramento</div>
+              <div class="rpt-brand-sub">Avaliação da Aprendizagem</div>
+            </div>
+          </div>
+          <div class="rpt-meta">
+            <div><strong>Gerado em:</strong> ${escapeHtml(now)}</div>
+            <div><strong>Sessão:</strong> ${escapeHtml(roleLabel)}</div>
+          </div>
+        </div>
+
+        <h1>Relatório de Avaliação da Aprendizagem</h1>
+        <div class="rpt-sub">Acompanhamento dos níveis de desempenho por escola e turma</div>
+
+        <div class="rpt-info-grid">
+          <div class="rpt-info-item">
+            <div class="rpt-info-label">Escola / Creche</div>
+            <div class="rpt-info-value">${escapeHtml(escola)}</div>
+          </div>
+          <div class="rpt-info-item">
+            <div class="rpt-info-label">INEP</div>
+            <div class="rpt-info-value">${escapeHtml(inep)}</div>
+          </div>
+          <div class="rpt-info-item" style="grid-column: span 2;">
+            <div class="rpt-info-label">Turmas (${filteredRecords.length} registro(s))</div>
+            <div class="rpt-info-value">${escapeHtml(turmas)}</div>
+          </div>
+        </div>
+
+        <h2 class="rpt-section-title">1. Resumo dos resultados</h2>
+        <div class="rpt-kpi-grid">
+          ${kpis.map(k => `
+            <div class="rpt-kpi">
+              <div class="rpt-kpi-label">${escapeHtml(k.label)}</div>
+              <div class="rpt-kpi-value" style="color:${k.color}">${k.value}</div>
+              <div class="rpt-kpi-pct" style="color:${k.color}">${k.pct}</div>
+            </div>
+          `).join("")}
+        </div>
+
+        <h2 class="rpt-section-title">2. Análise gráfica</h2>
+        <div class="rpt-chart-block">
+          <div class="rpt-chart-title">2.1 Quantidade por categoria</div>
+          ${countImg
+            ? `<img src="${countImg}" alt="Gráfico de quantidade por categoria" />`
+            : '<div class="rpt-empty">Gráfico indisponível</div>'}
+        </div>
+        <div class="rpt-chart-block">
+          <div class="rpt-chart-title">2.2 Distribuição percentual por nível</div>
+          ${percentImg
+            ? `<img src="${percentImg}" alt="Gráfico de distribuição percentual" />`
+            : '<div class="rpt-empty">Gráfico indisponível</div>'}
+        </div>
+
+        <div class="page-break"></div>
+        <h2 class="rpt-section-title">3. Detalhamento dos registros</h2>
+        <table class="rpt-table">
+          <thead>
+            <tr>
+              <th>Escola</th>
+              <th>Turma</th>
+              <th class="rpt-td-num">Abaixo crítico</th>
+              <th class="rpt-td-num">Crítico</th>
+              <th class="rpt-td-num">Intermediário</th>
+              <th class="rpt-td-num">Desejável</th>
+              <th class="rpt-td-num">Total</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+
+        <div class="rpt-footer">
+          <div>AMI · Painel de Monitoramento da Aprendizagem · © ${new Date().getFullYear()}</div>
+          <div>Diretoria de Avaliação e Monitoramento (SME/DAM)</div>
+        </div>
+      `;
+
+      return wrap;
+    }
+
+    async function generatePDFReport() {
+      if (!records.length) {
+        setStatus("Carregue a base de dados antes de gerar o relatório.", "error");
+        return;
+      }
+      if (typeof html2pdf === "undefined") {
+        setStatus("Biblioteca de PDF não carregada. Verifique sua conexão e recarregue a página.", "error");
+        return;
+      }
+
+      const btn = $("exportPdf");
+      const originalHTML = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span> Gerando...';
+
+      let reportEl = null;
+      try {
+        reportEl = buildReportElement();
+        document.body.appendChild(reportEl);
+
+        const imgs = reportEl.querySelectorAll("img");
+        await Promise.all(Array.from(imgs).map(img =>
+          img.complete ? Promise.resolve() : new Promise(r => { img.onload = img.onerror = r; })
+        ));
+        await new Promise(r => setTimeout(r, 200));
+
+        const schoolName = getReportSchoolName();
+        const dateStr = new Date().toISOString().slice(0, 10);
+        const fileName = `relatorio_AMI_${slugify(schoolName)}_${dateStr}.pdf`;
+
+        const opt = {
+          margin: [10, 8, 12, 8],
+          filename: fileName,
+          image: { type: "jpeg", quality: 0.95 },
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+            letterRendering: true,
+            backgroundColor: "#ffffff",
+            logging: false,
+            windowWidth: 750
+          },
+          jsPDF: { unit: "mm", format: "a4", orientation: "portrait", compress: true },
+          pagebreak: { mode: ["css", "legacy"], avoid: ["tr", "img", ".rpt-kpi"] }
+        };
+
+        await html2pdf().set(opt).from(reportEl).save();
+        setStatus("Relatório PDF gerado com sucesso.", "success");
+      } catch (err) {
+        console.error("[AMI] Erro ao gerar PDF:", err);
+        setStatus("Não foi possível gerar o PDF. " + (err?.message || ""), "error");
+      } finally {
+        if (reportEl) reportEl.remove();
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+      }
+    }
+
+    /* ============================================================
+       EVENTOS
+       ============================================================ */
+    $("loginForm").addEventListener("submit", handleLoginSubmit);
+
+    $("sidebarToggle").addEventListener("click", toggleSidebar);
+    $("sidebarBackdrop").addEventListener("click", () => {
+      if (!window.matchMedia("(max-width: 760px)").matches) return;
+      $("appShell").classList.add("sidebar-collapsed");
+      localStorage.setItem(SIDEBAR_KEY, "1");
+      updateHamburgerAria();
+    });
 
     $("schoolFilter").addEventListener("change", () => { populateClasses(); render(); });
     $("classFilter").addEventListener("change", render);
+
     $("resetFilters").addEventListener("click", () => {
-      $("schoolFilter").value = "";
-      populateClasses();
-      render();
+      if (session && session.role === "school") {
+        $("classFilter").value = "";
+        render();
+      } else {
+        $("schoolFilter").value = "";
+        populateClasses();
+        render();
+      }
     });
+
     $("reloadBtn").addEventListener("click", loadWorkbookFromSameFolder);
+    $("logoutBtn").addEventListener("click", logout);
+    $("exportPdf").addEventListener("click", generatePDFReport);
 
     $("themeToggle").addEventListener("click", () => {
       applyTheme(getTheme() === "dark" ? "light" : "dark");
@@ -897,8 +1752,48 @@
       URL.revokeObjectURL(url);
     });
 
-    $("currentYear").textContent = new Date().getFullYear();
-    loadWorkbookFromSameFolder();
+    /* ============================================================
+       INICIALIZAÇÃO
+       ============================================================ */
+    (async function init() {
+      $("currentYear").textContent = new Date().getFullYear();
+      $("loginYear").textContent = new Date().getFullYear();
+
+      const savedTheme = localStorage.getItem("ami-theme");
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      applyTheme(savedTheme || (prefersDark ? "dark" : "light"));
+      applyDyslexia(localStorage.getItem("ami-dyslexia") === "1");
+      applyFontSize(localStorage.getItem("ami-fs") || "md");
+
+      await loadLoginSheet();
+
+      const saved = sessionStorage.getItem(SESSION_KEY);
+      if (saved) {
+        try {
+          const s = JSON.parse(saved);
+          if (s.role === "master" && s.inep === MASTER_USER) {
+            session = s;
+            await enterDashboard();
+            return;
+          }
+          if (s.role === "school") {
+            const stillValid = loginUsers.find(u =>
+              u.INEP.toLowerCase() === String(s.inep || "").toLowerCase()
+            );
+            if (stillValid) {
+              session = s;
+              await enterDashboard();
+              return;
+            }
+          }
+        } catch (e) {
+          console.warn("[AMI] Sessão inválida descartada.", e);
+        }
+        sessionStorage.removeItem(SESSION_KEY);
+      }
+
+      $("loginUser").focus();
+    })();
   })();
   </script>
 </body>
