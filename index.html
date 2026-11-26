@@ -348,18 +348,21 @@
        PATCH 1 — Host do PDF sem !important/height/overflow fixos
        ============================================================ */
     #pdfReportHost {
-      position: fixed;
+      position: absolute;
       top: 0;
       left: 0;
       width: 1000px;
       height: auto;
       z-index: 45;
       background: #ffffff;
+      margin: 0;
+      padding: 0;
       pointer-events: none;
     }
     #pdfReportHost > #pdfReport {
       background: #ffffff;
-      margin: 0 auto;
+      margin: 0;
+      padding: 0;
     }
 
     @media (min-width: 761px) {
@@ -422,7 +425,7 @@
         </div>
       </div>
 
-      <h2 class="login-heading">Entrar no painel</h2>
+      <h2 class="login-heading">Seja bem-vindo(a)!</h2>
       <p class="login-hint">Use o INEP cadastrado na sua escola ou as credenciais de administrador.</p>
 
       <label class="login-label" for="loginUser">Usuário / INEP</label>
@@ -1401,24 +1404,36 @@
       }
     }
 
-    async function captureChartsForPDF() {
+        async function captureChartsForPDF() {
       const countWrap = $("countChart") ? $("countChart").parentElement : null;
       const percentWrap = $("percentChartWrap");
       const origCount = countWrap ? countWrap.style.height : "";
       const origPercent = percentWrap ? percentWrap.style.height : "";
 
       try {
+        // Força altura compacta para caber na folha 1
         if (countWrap) countWrap.style.height = "280px";
         if (percentWrap) percentWrap.style.height = "280px";
-        if (countChart) countChart.resize();
-        if (percentChart) percentChart.resize();
-        await new Promise(r => setTimeout(r, 400));
 
-        return {
-          countImg: safeChartImage(countChart),
-          percentImg: safeChartImage(percentChart)
-        };
+        // resize + update("none") garante que o canvas seja redesenhado
+        if (countChart) { countChart.resize(); countChart.update("none"); }
+        if (percentChart) { percentChart.resize(); percentChart.update("none"); }
+
+        // Aguarda reflow completo
+        await new Promise(r => setTimeout(r, 700));
+
+        // Captura cada gráfico individualmente
+        const countImg = safeChartImage(countChart);
+        const percentImg = safeChartImage(percentChart);
+
+        // Diagnóstico: garante que ambos têm conteúdo
+        console.log(`[AMI] Charts capturados: count=${countImg.length}b, percent=${percentImg.length}b`);
+        if (!countImg) console.warn("[AMI] Gráfico 1 vazio!");
+        if (!percentImg) console.warn("[AMI] Gráfico 2 vazio!");
+
+        return { countImg, percentImg };
       } finally {
+        // Restaura alturas originais
         if (countWrap) countWrap.style.height = origCount;
         if (percentWrap) percentWrap.style.height = origPercent;
         if (countChart) countChart.resize();
@@ -1470,7 +1485,7 @@
       wrap.style.cssText = `
         width: ${REPORT_WIDTH}px; background: #ffffff; padding: 16px 22px;
         box-sizing: border-box;
-        margin: 0 auto;
+        margin: 0; padding-left: 22px; padding-right: 22px;
         font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
         color: #1a2433; font-size: 11px; line-height: 1.4;
         text-rendering: geometricPrecision;
@@ -1693,7 +1708,7 @@
       return wrap;
     }
 
-    async function generatePDFReport() {
+        async function generatePDFReport() {
       if (!records.length) {
         setStatus("Carregue a base de dados antes de gerar o relatório.", "error");
         return;
@@ -1708,26 +1723,54 @@
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span> Gerando...';
 
+      const appShell = $("appShell");
+      const loginScreen = $("loginScreen");
+      const loadingOverlay = $("loadingOverlay");
+      const savedAppStyle = appShell.getAttribute("style") || "";
+      const savedLoginStyle = loginScreen.getAttribute("style") || "";
+      const savedScrollX = window.scrollX;
+      const savedScrollY = window.scrollY;
+
       let host = null;
+
       try {
+        // 1) Captura dos gráficos (UI ainda visível)
         const { countImg, percentImg } = await captureChartsForPDF();
 
+        // 2) Build do relatório com os dados já em memória
+        const reportEl = buildReportElement(countImg, percentImg);
+
+        // 3) ESCONDE TODA A UI: sidebar sai junto com appShell
+        appShell.style.setProperty("display", "none", "important");
+        loginScreen.style.setProperty("display", "none", "important");
+        loadingOverlay.classList.add("show");
+
+        // 4) Força scroll para 0,0 (evita offset do html2canvas)
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+
+        // 5) Aguarda o browser recalcular o layout (appShell removida)
+        await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+        // 6) Cria host absoluto em 0,0 do body
         host = document.createElement("div");
         host.id = "pdfReportHost";
-
-        const reportEl = buildReportElement(countImg, percentImg);
+        host.style.cssText = `
+          position: absolute !important;
+          top: 0 !important;
+          left: 0 !important;
+          width: ${REPORT_WIDTH}px !important;
+          height: auto !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          background: #ffffff !important;
+          z-index: 999999 !important;
+        `;
         host.appendChild(reportEl);
         document.body.appendChild(host);
 
-        const w = reportEl.offsetWidth;
-        const h = reportEl.offsetHeight;
-        console.log(`[AMI] Relatório montado: ${w}×${h}px, ${filteredRecords.length} registros, ` +
-                    `${reportEl.querySelectorAll("img").length} imagem(ns)`);
-
-        if (w === 0 || h === 0) {
-          throw new Error("Relatório com dimensões zero.");
-        }
-
+        // 7) Fonts + imagens
         if (document.fonts && document.fonts.ready) {
           try { await document.fonts.ready; } catch (_) {}
         }
@@ -1737,12 +1780,29 @@
             ? Promise.resolve()
             : new Promise(r => { img.onload = img.onerror = r; })
         ));
-        await new Promise(r => setTimeout(r, 500));
 
+        // 8) Settle time
+        await new Promise(r => setTimeout(r, 700));
+
+        // 9) Diagnóstico preciso
+        const rect = reportEl.getBoundingClientRect();
+        console.log(`[AMI] Report rect: ${rect.width}×${rect.height} at (${rect.left}, ${rect.top})`);
+        console.log(`[AMI] Gráficos: count=${countImg.length}b, percent=${percentImg.length}b, ` +
+                    `${filteredRecords.length} registros, ${imgs.length} imagens`);
+
+        if (rect.width < 100 || rect.height < 100) {
+          throw new Error(`Relatório com dimensões inválidas: ${rect.width}×${rect.height}`);
+        }
+        if (rect.left !== 0 || rect.top !== 0) {
+          console.warn(`[AMI] AVISO: relatório não está em (0,0) - está em (${rect.left}, ${rect.top})`);
+        }
+
+        // 10) Nome do arquivo
         const schoolName = getReportSchoolName();
         const dateStr = new Date().toISOString().slice(0, 10);
         const fileName = `relatorio_AMI_${slugify(schoolName)}_${dateStr}.pdf`;
 
+        // 11) Opções do html2pdf
         const opt = {
           margin: [8, 6, 8, 6],
           filename: fileName,
@@ -1750,30 +1810,48 @@
           html2canvas: {
             scale: 2,
             useCORS: true,
-            /* PATCH 3: letterRendering removido (causa duplicação), windowHeight adicionado */
             backgroundColor: "#ffffff",
             logging: false,
             scrollX: 0,
             scrollY: 0,
+            x: 0,
+            y: 0,
             width: REPORT_WIDTH,
+            height: rect.height,
             windowWidth: REPORT_WIDTH,
-            windowHeight: 1000,
-            /* PATCH 2: onclone usa setProperty com important para neutralizar o fixed */
+            windowHeight: rect.height,
             onclone: (clonedDoc) => {
-              const ov = clonedDoc.getElementById("loadingOverlay");
-              if (ov) ov.style.setProperty("display", "none", "important");
+              // Esconde TUDO que não é relatório no clone
+              ["appShell", "loginScreen", "loadingOverlay"].forEach(id => {
+                const el = clonedDoc.getElementById(id);
+                if (el) el.style.setProperty("display", "none", "important");
+              });
+              const vw = clonedDoc.querySelector("[vw]");
+              if (vw) vw.style.setProperty("display", "none", "important");
+              const skip = clonedDoc.querySelector(".skip-link");
+              if (skip) skip.style.setProperty("display", "none", "important");
 
+              // Mantém o host no canto superior esquerdo absoluto
               const hst = clonedDoc.getElementById("pdfReportHost");
               if (hst) {
-                hst.style.setProperty("position", "static", "important");
-                hst.style.setProperty("top", "auto", "important");
-                hst.style.setProperty("left", "auto", "important");
+                hst.style.setProperty("position", "absolute", "important");
+                hst.style.setProperty("top", "0", "important");
+                hst.style.setProperty("left", "0", "important");
+                hst.style.setProperty("margin", "0", "important");
+                hst.style.setProperty("padding", "0", "important");
                 hst.style.setProperty("width", REPORT_WIDTH + "px", "important");
                 hst.style.setProperty("height", "auto", "important");
-                hst.style.setProperty("min-height", "auto", "important");
-                hst.style.setProperty("max-height", "none", "important");
                 hst.style.setProperty("overflow", "visible", "important");
                 hst.style.setProperty("display", "block", "important");
+                hst.style.setProperty("transform", "none", "important");
+                hst.style.setProperty("z-index", "999999", "important");
+              }
+
+              // Body sem margem/padding no clone
+              const b = clonedDoc.body;
+              if (b) {
+                b.style.setProperty("margin", "0", "important");
+                b.style.setProperty("padding", "0", "important");
               }
             }
           },
@@ -1784,19 +1862,25 @@
           }
         };
 
+        // 12) Gera o PDF
         await html2pdf().set(opt).from(reportEl).save();
         setStatus("Relatório PDF gerado com sucesso.", "success");
-        console.log(`[AMI] PDF gerado: ${fileName} (folha 1 = cabeçalho+KPIs+gráficos, folha 2 = tabela)`);
+        console.log(`[AMI] PDF OK: ${fileName} — folha 1 = cabeçalho+KPIs+gráficos | folha 2 = tabela`);
       } catch (err) {
         console.error("[AMI] Erro ao gerar PDF:", err);
         setStatus("Não foi possível gerar o PDF. " + (err?.message || "Ver console (F12)."), "error");
       } finally {
+        // Restaura TODO o estado
         if (host) host.remove();
+        appShell.setAttribute("style", savedAppStyle);
+        loginScreen.setAttribute("style", savedLoginStyle);
+        loadingOverlay.classList.remove("show");
+        window.scrollTo(savedScrollX, savedScrollY);
         btn.disabled = false;
         btn.innerHTML = originalHTML;
       }
     }
-
+    
     /* ============================================================
        EVENTOS
        ============================================================ */
